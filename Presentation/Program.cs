@@ -1,7 +1,28 @@
-var builder = WebApplication.CreateBuilder(args);
+using System.Text;
+using Application.Interfaces;
+using Infrastructure.Data;
+using Domain.Interfaces;
+using Infrastructure.Repositories;
+using Application.Services;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Domain.Entities;
+using Npgsql;
+using Microsoft.EntityFrameworkCore;
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
+    options.UseNpgsql(
+        configuration.GetConnectionString("WebApiDatabase"),
+        npgsql => npgsql.MigrationsAssembly("Infrastructure")
+    )
+);
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRequestRepository, RequestRepository>();
+builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
