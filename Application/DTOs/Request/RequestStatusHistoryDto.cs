@@ -1,14 +1,10 @@
-﻿namespace Application.Domain.Enums
+﻿namespace Application.Dto.Request;
+public class RequestStatusHistoryDto
 {
-    public class RequestStatusHistoryDto
-    {
-        public enum RequestStatus
-        {
-            Sent,
-            MasterAssigned,
-            InProgress,
-            WorkCompleted,
-            Closed
-        }
-    }
+        public int Id { get; set; }
+        public string OldStatus { get; set; }
+        public string NewStatus { get; set; }
+        public DateTime ChangedAt { get; set; }
+        public int ChangedByUserId { get; set; }
+        public string ChangedByUserEmail { get; set; }
 }

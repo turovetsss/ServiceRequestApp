@@ -24,3 +24,12 @@ public class Request
     public ICollection<Document> Documents { get; set; } = new List<Document>();
     public ICollection<RequestStatusHistory> StatusHistory { get; set; } = new List<RequestStatusHistory>();
 }
+
+public enum RequestStatus
+{
+    Sent,
+    MassterAssigned,
+    InProgress,
+    WorkCompleted,
+    Closed
+}

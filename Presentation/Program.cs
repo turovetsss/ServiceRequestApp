@@ -19,6 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         npgsql => npgsql.MigrationsAssembly("Infrastructure")
     )
 );
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();

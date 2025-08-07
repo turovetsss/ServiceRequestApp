@@ -4,73 +4,42 @@ using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Repositories;
-
-public abstract class RepositoryBase<T>(ApplicationDbContext context) : IRepository<T> 
-    where T : class
+public class Repository<T> : IRepository<T> where T : class
 {
-    private IRepository<T> _repositoryImplementation;
+    private readonly ApplicationDbContext _context;
+    private readonly DbSet<T> _db;
 
-    public virtual async Task<T?> GetByIdAsync(int id)
+    public Repository(ApplicationDbContext context)
     {
-        return await context.Set<T>().FindAsync(id);
-    }
-    public virtual async Task<T?> GetByIdWithIncludesAsync(
-        int id, 
-        params Expression<Func<T, object>>[] includes)
-    {
-        var query = context.Set<T>().AsQueryable();
-        
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
-
-        return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
+        _context = context;
+        _db = context.Set<T>();
     }
 
-    public virtual async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<T?> GetByIdAsync(int id)
     {
-        return await context.Set<T>().ToListAsync();
+        return await _db.FindAsync(id);
     }
 
-    public abstract Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
-    public abstract Task AddAsync(T entity);
-    public abstract void Update(T entity);
-    public abstract void Delete(T entity);
-    public abstract Task SaveChangesAsync();
-
-    public virtual async Task<IEnumerable<T>> GetWithIncludesAsync(
-        params Expression<Func<T, object>>[] includes)
+    public async Task<IEnumerable<T>> GetAllAsync()
     {
-        var query = context.Set<T>().AsQueryable();
-        
-        foreach (var include in includes)
-        {
-            query = query.Include(include);
-        }
-
-        return await query.ToListAsync();
+        return await _db.ToListAsync();
     }
 
-    public virtual async Task CreateAsync(T entity)
+    public async Task AddAsync(T entity)
     {
-        await context.Set<T>().AddAsync(entity);
-        await context.SaveChangesAsync();
+        await _db.AddAsync(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public virtual async Task UpdateAsync(T entity)
+    public async Task UpdateAsync(T entity)
     {
-        context.Set<T>().Update(entity);
-        await context.SaveChangesAsync();
+        _db.Update(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public virtual async Task DeleteAsync(int id)
+    public async Task DeleteAsync(T entity)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            context.Set<T>().Remove(entity);
-            await context.SaveChangesAsync();
-        }
+        _db.Remove(entity);
+        await _context.SaveChangesAsync();
     }
 }

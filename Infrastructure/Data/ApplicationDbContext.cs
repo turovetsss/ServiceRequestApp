@@ -1,5 +1,4 @@
-﻿using Application.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Domain.Entities;
 
@@ -84,6 +83,5 @@ public class ApplicationDbContext: DbContext
             .HasForeignKey(rsh => rsh.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
     }
-  
-
+    
 }

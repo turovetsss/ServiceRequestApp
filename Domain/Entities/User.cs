@@ -14,3 +14,9 @@ public class User
     public ICollection<Request> AssignedRequests { get; set; } = new List<Request>();
     public ICollection<RequestStatusHistory> StatusChanges  { get; set; } = new List<RequestStatusHistory>();
 }
+
+public enum UserRole
+{
+    Admin,
+    Master
+}
