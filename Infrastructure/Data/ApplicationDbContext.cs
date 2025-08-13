@@ -29,59 +29,66 @@ public class ApplicationDbContext: DbContext
             .HasForeignKey(u => u.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Request>(entity =>
-        {  entity.HasOne(r => r.CreatedByAdmin)
-            .WithMany()
-            .HasForeignKey(r => r.CreatedByAdminId)
-            .OnDelete(DeleteBehavior.Restrict);
+        {
+            entity.HasOne(r => r.CreatedByAdmin)
+                .WithMany(u => u.CreatedRequests)
+                .HasForeignKey(r => r.CreatedByAdminId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(r => r.AssignedMaster)
-                .WithMany()
+                .WithMany(u => u.AssignedRequests)
                 .HasForeignKey(r => r.AssignedMasterId)
                 .OnDelete(DeleteBehavior.SetNull);
+
             entity.HasOne(r => r.Company)
                 .WithMany(c => c.Requests)
                 .HasForeignKey(r => r.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
-        
+
             entity.HasOne(r => r.Equipment)
                 .WithMany(e => e.Requests)
                 .HasForeignKey(r => r.EquipmentId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         });
         modelBuilder.Entity<Equipment>()
             .HasOne(e => e.Company)
             .WithMany(c => c.Equipments)
             .HasForeignKey(e => e.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
-    
         modelBuilder.Entity<EquipmentPhoto>()
             .HasOne(ep => ep.Equipment)
             .WithMany(e => e.Photos)
             .HasForeignKey(ep => ep.EquipmentId)
             .OnDelete(DeleteBehavior.Cascade);
-    
         modelBuilder.Entity<RequestPhoto>()
             .HasOne(rp => rp.Request)
-            .WithMany(r => r.Photos)
+            .WithMany(r => r.ProblemPhotos)
             .HasForeignKey(rp => rp.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
-    
         modelBuilder.Entity<CompletedWorkPhoto>()
             .HasOne(cwp => cwp.Request)
             .WithMany(r => r.CompletedWorkPhotos)
             .HasForeignKey(cwp => cwp.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
-    
+
         modelBuilder.Entity<Document>()
             .HasOne(d => d.Request)
             .WithMany(r => r.Documents)
             .HasForeignKey(d => d.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
-    
-        modelBuilder.Entity<RequestStatusHistory>()
-            .HasOne(rsh => rsh.Request)
-            .WithMany(r => r.StatusHistory)
-            .HasForeignKey(rsh => rsh.RequestId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<RequestStatusHistory>(entity =>
+        {
+            entity.HasOne(rsh => rsh.Request)
+                .WithMany(r => r.StatusHistory)
+                .HasForeignKey(rsh => rsh.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(rsh => rsh.ChangedByUser)
+                .WithMany(u => u.StatusChanges)
+                .HasForeignKey(rsh => rsh.ChangedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        
     }
     
 }

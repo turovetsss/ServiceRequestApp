@@ -2,7 +2,7 @@
 
 public class CreateRequestDto
 {
-    public int? EquipmentId { get; set; }
+    public int EquipmentId { get; set; }
     public string Description { get; set; }
     public string Phone { get; set; }
     public DateTime DateFrom { get; set; }

@@ -9,17 +9,16 @@ public class RequestRepository(ApplicationDbContext context):IRequestRepository
     public async Task<Request?> GetRequestWithDetailsAsync(int id)
     {
         return await context.Requests
-            .Include(r => r.Company)                  
-            .Include(r => r.Equipment)                 
-                .ThenInclude(e => e.Photos)           
-            .Include(r => r.CreatedByAdmin)            
-            .Include(r => r.AssignedMaster)           
-            .Include(r => r.Photos)                 
-            .Include(r => r.CompletedWorkPhotos)       
-            .Include(r => r.Documents)                 
-            .Include(r => r.StatusHistory)             
-            .ThenInclude(h => h.ChangedByUser)   
-            .AsSplitQuery()                          
+            .Include(r => r.Company)
+            .Include(r => r.Equipment)
+            .Include(e => e.ProblemPhotos)
+            .Include(r => r.CreatedByAdmin)
+            .Include(r => r.AssignedMaster)
+            .Include(r => r.CompletedWorkPhotos)
+            .Include(r => r.Documents)
+            .Include(r => r.StatusHistory)
+            .ThenInclude(h => h.ChangedByUser)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(r => r.Id == id);
        
     }

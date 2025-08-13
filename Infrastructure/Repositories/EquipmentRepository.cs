@@ -6,6 +6,7 @@ namespace Infrastructure.Repositories;
 
 public class EquipmentRepository(ApplicationDbContext context):IEquipmentRepository
 {
+ 
     public async Task<Equipment?> GetEquipmentWithDetailsAsync(int id)
     {
        return await context.Equipments

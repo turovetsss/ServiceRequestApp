@@ -12,7 +12,7 @@ public class User
     public Company Company { get; set; }
     public ICollection<Request> CreatedRequests { get; set; } = new List<Request>();
     public ICollection<Request> AssignedRequests { get; set; } = new List<Request>();
-    public ICollection<RequestStatusHistory> StatusChanges  { get; set; } = new List<RequestStatusHistory>();
+    public ICollection<RequestStatusHistory> StatusChanges  { get; set; } 
 }
 
 public enum UserRole
