@@ -6,6 +6,7 @@ namespace Infrastructure.Repositories;
 
 public class CompanyRepository(ApplicationDbContext context) : ICompanyRepository
 {
+
     public async Task<Company?> GetCompanyWithDetailsAsync(int id)
     {
         return await context.Companies
@@ -22,14 +23,14 @@ public class CompanyRepository(ApplicationDbContext context) : ICompanyRepositor
     {
         return await context.Companies.ToListAsync();
     }
-
-    public async Task CreateCompaniesAsync(Company? company)
+    
+    public async Task CreateCompanyAsync(Company? company)
     {
         context.Companies.Add(company);
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateCompaniesAsync(Company? company)
+    public async Task UpdateCompanyAsync(Company? company)
     {
         context.Companies.Update(company);
         await context.SaveChangesAsync();
