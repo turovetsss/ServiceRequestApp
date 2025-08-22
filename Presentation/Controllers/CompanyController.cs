@@ -31,4 +31,22 @@ public class CompanyController(ICompanyService companyService):ControllerBase
             return NotFound();
         return Ok(company);
     }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(CompanyDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateCompany(int id, [FromBody] UpdateCompanyDto updateDto)
+    {
+        var company= await companyService.UpdateCompanyAsync(id, updateDto);
+        return Ok(company);
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(typeof(CompanyDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteCompany(int id)
+    {
+        await companyService.DeleteCompanyAsync(id);
+        return NoContent();
+    }
 }

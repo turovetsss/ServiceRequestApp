@@ -184,3 +184,5 @@ D:\проекти\ServiceRequestApp\Presentation\bin\Debug\net8.0\runtimes\win\l
 D:\проекти\ServiceRequestApp\Presentation\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 D:\проекти\ServiceRequestApp\Presentation\bin\Debug\net8.0\Infrastructure.dll
 D:\проекти\ServiceRequestApp\Presentation\bin\Debug\net8.0\Infrastructure.pdb
+D:\проекти\ServiceRequestApp\Presentation\bin\Debug\net8.0\BCrypt.Net-Core.dll
+D:\проекти\ServiceRequestApp\Presentation\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

@@ -8,8 +8,6 @@ namespace Application.Services;
 
 public class CompanyService(ICompanyRepository companyRepository): ICompanyService
 {
-    private readonly ICompanyRepository _companyRepository = companyRepository;
-
     public async Task<CompanyDto> CreateCompanyAsync(CreateCompanyDto createCompanyDto)
     {
         var company = new Company

@@ -1,6 +1,24 @@
-﻿namespace Presentation.Controllers;
+﻿using Application.DTOs.User;
+using Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
-public class AuthController
+namespace Presentation.Controllers;
+
+[ApiController]
+[Route("api/auth")]
+public class AuthController(IAuthService authService):ControllerBase
 {
-    
+    [HttpPost("register-admin")]
+    public async Task<ActionResult<AuthResponseDto>> RegisterAdmin(RegisterDto registerDto)
+    {
+        var response = await authService.RegisterAdminAsync(registerDto);
+        return Ok(response);
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
+    {
+        var response = await authService.LoginAsync(loginDto);
+        return Ok(response);
+    }
 }
