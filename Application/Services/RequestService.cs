@@ -10,14 +10,11 @@ namespace Application.Services;
 public class RequestService(
     IEquipmentRepository equipmentRepository,
     IUserRepository userRepository,
-    IRequestRepository requestRepository)
+    IRequestRepository requestRepository,
+    IRequestStatusHistoryRepository requestStatusHistoryRepository)
     : IRequestService
 {
-    private readonly IEquipmentRepository _equipmentRepository = equipmentRepository;
-    private readonly IUserRepository _userRepository = userRepository;
-    private readonly IRequestRepository _requestRepository = requestRepository;
-
-
+    
     public async Task<RequestDto> CreateRequestAsync(CreateRequestDto createRequestDto, int companyId, int adminId)
     {
         var request = new Request
@@ -48,7 +45,8 @@ public class RequestService(
             }).ToList()
         };
     }
-
+    
+    
     public async Task<RequestDto> GetRequestByIdAsync(int requestId)
     {
         var request = await requestRepository.GetRequestWithDetailsAsync(requestId);
@@ -82,7 +80,7 @@ public class RequestService(
             }).ToList(),
             StatusHistory = request.StatusHistory.Select(h => new RequestStatusHistoryDto
             {
-                Id = h.Id,
+                Id = h.RequestId,
                 OldStatus = h.OldStatus.ToString(),
                 NewStatus = h.NewStatus.ToString(),
                 ChangedAt = h.ChangedAt,
@@ -118,6 +116,48 @@ public class RequestService(
         await  requestRepository.DeleteRequstAsync(requestId);
     }
 
+    public async Task AssignMasterAsync(int requestId, int userId)
+    {
+        var request = await requestRepository.GetRequestByIdAsync(requestId);
+        var master=await userRepository.GetByIdAsync(userId);
+        request.AssignedMasterId = master.Id;
+        if (request.Status == RequestStatus.Sent)
+        {
+            await UpdateStatusAsync(requestId, RequestStatus.MasterAssigned, request.CreatedByAdminId);
+        }
+        else
+        {
+            await requestRepository.UpdateRequestAsync(request);
+        }
+    }
+
+    public async Task UpdateStatusAsync(int requestId, RequestStatus newStatus, int userId)
+    {
+        var request = await requestRepository.GetRequestByIdAsync(requestId);
+        var oldStatus = request.Status;
+        request.Status = newStatus;
+        await requestRepository.UpdateRequestAsync(request);
+        await requestStatusHistoryRepository.AddAsync(new RequestStatusHistory
+        {
+            RequestId = requestId,
+            OldStatus = oldStatus,
+            NewStatus = newStatus,
+            ChangedByUserId = userId,
+            ChangedAt = DateTime.UtcNow
+        });
+    }
+    public async Task<IEnumerable<RequestStatusHistoryDto>> GetStatusHistoryAsync(int requestId)
+    {
+       var history=await requestStatusHistoryRepository.GetByRequestIdAsync(requestId);
+       return history.Select(h => new RequestStatusHistoryDto
+       {
+           Id = h.RequestId,
+           OldStatus = h.OldStatus.ToString(),
+           NewStatus = h.NewStatus.ToString(),
+           ChangedAt = h.ChangedAt,
+           ChangedByUserId = h.ChangedByUserId,
+       });
+    }
     public async Task<IEnumerable<RequestDto>> GetAllAsync()
     {
         var requests = await requestRepository.GetAllAsync();
@@ -136,4 +176,6 @@ public class RequestService(
                 };
         }).ToList();
     }
+
+
 }

@@ -50,6 +50,7 @@ builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IRequestStatusHistoryRepository, RequestStatusHistoryRepository>();
 builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 
 builder.Services.AddEndpointsApiExplorer();

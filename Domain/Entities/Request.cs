@@ -29,7 +29,7 @@ public class Request
 public enum RequestStatus
 {
     Sent,
-    MassterAssigned,
+    MasterAssigned,
     InProgress,
     WorkCompleted,
     Closed

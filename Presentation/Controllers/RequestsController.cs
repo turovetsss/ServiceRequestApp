@@ -1,7 +1,11 @@
-﻿using Application.DTOs.Request;
+﻿using System.Data;
+using System.Security.Claims;
+using Application.Dto.Request;
+using Application.DTOs.Request;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Enums;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +27,27 @@ public class RequestsController(IRequestService requestService) : ControllerBase
         return CreatedAtAction(nameof(GetRequest), new { id = request.Id }, request);
     }
 
+    [HttpPatch("{id}/assign-master")]
+    public async Task<IActionResult> AssignMaster(int id, [FromBody] AssignMasterDto assignMasterDto)
+    {
+        await requestService.AssignMasterAsync(id,assignMasterDto.UserId);
+        return Ok();
+    }
+
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDto updateStatusDto)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        await requestService.UpdateStatusAsync(id, updateStatusDto.NewStatus, userId);
+        return Ok();
+    }
+
+    [HttpGet("{id}/status-history")]
+    public async Task<IActionResult> GetStatusHistory(int id)
+    {
+        var history=await requestService.GetStatusHistoryAsync(id);
+        return Ok(history);
+    } 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
