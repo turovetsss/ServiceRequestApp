@@ -7,7 +7,7 @@ public interface IEquipmentService
     Task<EquipmentDto> GetEquipmentByIdAsync(int id);
     Task<IEnumerable<EquipmentDto>> GetAllEquipmentAsync();
     Task<EquipmentDto> CreateEquipmentAsync(CreateEquipmentDto createDto, int companyId);
-    Task<EquipmentDto> UpdateEquipmentAsync(UpdateEquipmentDto updateDto);
+    Task<EquipmentDto> UpdateEquipmentAsync(int id,UpdateEquipmentDto updateDto);
     Task DeleteEquipmentAsync(int id);
     Task AddEquipmentPhotoAsync(int equipmentId, string photoUrl);
     Task RemoveEquipmentPhotoAsync(int photoId);

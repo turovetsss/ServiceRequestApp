@@ -7,13 +7,7 @@ namespace Infrastructure.Repositories;
 public class CompanyRepository(ApplicationDbContext context) : ICompanyRepository
 {
 
-    public async Task<Company?> GetCompanyWithDetailsAsync(int id)
-    {
-        return await context.Companies
-            .Include(c=>c.Name)
-                .FirstOrDefaultAsync(e => e.Id == id);
-       
-    }
+    
     public async Task<Company?> GetCompanyByIdAsync(int id)
     {
         return await context.Companies.FindAsync(id);
@@ -38,7 +32,7 @@ public class CompanyRepository(ApplicationDbContext context) : ICompanyRepositor
 
     public async Task DeleteCompanyAsync(int id)
     {
-        var company = await GetCompanyWithDetailsAsync(id);
+        var company = await GetCompanyByIdAsync(id);
         if (company != null)
         {
             context.Companies.Remove(company);

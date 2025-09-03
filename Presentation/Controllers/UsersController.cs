@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers;
 
-[Authorize(Roles="Admin")]
+
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UsersController(IUserService userService):ControllerBase
 {
-    [HttpPost("post-masters")]
+    [HttpPost("masters")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<UserDto>>> CreateMaster(CreateMasterDto createMasterDto)
     {
         var companyId=int.Parse(User.FindFirst("CompanyId")?.Value);

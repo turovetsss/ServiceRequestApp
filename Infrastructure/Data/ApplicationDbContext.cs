@@ -28,6 +28,18 @@ public class ApplicationDbContext: DbContext
             .WithMany(c => c.Users)
             .HasForeignKey(u => u.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Company>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Name).HasMaxLength(50);
+
+            entity.HasMany(c => c.Users)
+                .WithOne(u => u.Company)
+                .HasForeignKey(u => u.CompanyId);
+            entity.HasMany(c => c.Requests)
+                .WithOne(r => r.Company)
+                .HasForeignKey(r => r.CompanyId);
+        });
         modelBuilder.Entity<Request>(entity =>
         {
             entity.HasOne(r => r.CreatedByAdmin)

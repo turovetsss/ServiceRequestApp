@@ -46,7 +46,7 @@ public class AuthService(IUserRepository userRepository, ICompanyRepository comp
 
     private AuthResponseDto GenerateJwtResponse(User user)
     {
-        string secretKey=configuration["JWT:Secret"];
+        var secretKey=configuration["Jwt:Secret"];
         SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var claims = new List<Claim>
         {

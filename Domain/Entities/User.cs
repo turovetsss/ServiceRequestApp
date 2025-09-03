@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using System.Security.Claims;
+using Domain.Enums;
 namespace Domain.Entities;
 
 public class User
@@ -17,6 +18,6 @@ public class User
 
 public enum UserRole
 {
-    Admin,
-    Master
+    Admin=0,
+    Master=1
 }

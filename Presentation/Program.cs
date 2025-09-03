@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Application.Interfaces;
 using Infrastructure.Data;
@@ -15,8 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
-var Secret = builder.Configuration["Jwt:Secret"] 
-                ?? "my_super_secret_key_secret_secret_323232";
+var secret=builder.Configuration["Jwt:Secret"];
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseNpgsql(
@@ -35,13 +35,14 @@ builder.Services.AddAuthentication(options =>
         {
             ValidateIssuerSigningKey = true,
             ValidateIssuer = false,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Secret)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
             ValidateAudience = false,
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ValidateLifetime = false,
+            RoleClaimType = ClaimTypes.Role
         };
     });
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -59,11 +60,12 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Service Request API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme.",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Description  = "Введите токен в формате: Bearer {token}",
+        Name         = "Authorization",
+        In           = ParameterLocation.Header,
+        Type         = SecuritySchemeType.Http,
+        Scheme       = "bearer",
+        BearerFormat = "JWT"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {

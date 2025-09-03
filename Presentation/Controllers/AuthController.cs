@@ -18,7 +18,17 @@ public class AuthController(IAuthService authService):ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
     {
-        var response = await authService.LoginAsync(loginDto);
-        return Ok(response);
+        try
+        {
+            var response = await authService.LoginAsync(loginDto);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { error = ex.Message });
+        }  catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Внутренняя ошибка сервера" });
+        }
     }
 }

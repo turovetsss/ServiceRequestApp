@@ -8,23 +8,11 @@ namespace Application.Services;
 
 public class CompanyService(ICompanyRepository companyRepository): ICompanyService
 {
-    public async Task<CompanyDto> CreateCompanyAsync(CreateCompanyDto createCompanyDto)
-    {
-        var company = new Company
-        {
-            Name = createCompanyDto.Name
-        };
-        await companyRepository.CreateCompanyAsync(company);
-        return new CompanyDto
-        {
-            Id = company.Id,
-            Name = company.Name
-        };
-    }
+  
 
-    public async Task<CompanyDto> GetCompanyByIdAsync(int companyId)
+    public async Task<CompanyDto> GetCompanyByIdAsync(int id)
     {
-        var company =  await companyRepository.GetCompanyByIdAsync(companyId);
+        var company =  await companyRepository.GetCompanyByIdAsync(id);
         if (company == null) throw new Exception("Company not found");
         return new CompanyDto
         {
@@ -42,11 +30,7 @@ public class CompanyService(ICompanyRepository companyRepository): ICompanyServi
         return await GetCompanyByIdAsync(companyId);
     }
 
-    public async Task DeleteCompanyAsync(int companyId)
-    {
-        var company =  companyRepository.GetCompanyByIdAsync(companyId);
-        await companyRepository.DeleteCompanyAsync(companyId);
-    }
+ 
 
     public async Task<IEnumerable<CompanyDto>> GetAllAsync()
     {

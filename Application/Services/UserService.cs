@@ -24,6 +24,7 @@ public class UserService(IUserRepository userRepository):IUserService
             Id = master.Id,
             Email = master.Email,
             Role = master.Role,
+            CompanyId = companyId
         };
     }
 }
