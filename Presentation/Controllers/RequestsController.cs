@@ -8,6 +8,7 @@ using Domain.Enums;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RequestStatus = Domain.Entities.RequestStatus;
 
 namespace Presentation.Controllers;
 
@@ -20,11 +21,32 @@ public class RequestsController(IRequestService requestService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateRequest([FromBody] CreateRequestDto createDto)
     {
-        var companyId = 1;//int.Parse(User.FindFirst("CompanyId").Value);
-        var adminId = 1; //int.Parse(User.FindFirst("UserId").Value);
+        var companyId = int.Parse(User.FindFirst("CompanyId").Value);
+        var adminId = int.Parse(User.FindFirst("UserId").Value);
         
         var request = await requestService.CreateRequestAsync(createDto, companyId, adminId);
         return CreatedAtAction(nameof(GetRequest), new { id = request.Id }, request);
+    }
+
+    [HttpGet]
+    [ProducesResponseType(typeof(List<RequestDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRequests([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
+        [FromQuery] RequestStatus? status = null)
+    {
+        var companyId = int.Parse(User.FindFirst("CompanyId").Value);
+        var ifisMaster = User.IsInRole("Master");
+        var userId = int.Parse(User.FindFirst("UserId").Value);
+        List<RequestDto> requests = null;
+        if (ifisMaster)
+        {
+            var allRequests=await requestService.GetAllRequestsByCompanyIdAsync(companyId, page, pageSize,status); 
+            requests = allRequests.Where(r=>r.AssignedMasterId==userId).ToList();
+        }
+        else
+        {
+            requests = await requestService.GetAllRequestsByCompanyIdAsync(companyId, page, pageSize, status);
+        }
+        return Ok(requests);
     }
 
     [HttpPatch("{id}/assign-master")]

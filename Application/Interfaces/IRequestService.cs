@@ -13,6 +13,6 @@ public interface IRequestService
    Task DeleteRequestAsync(int requestId);
    Task AssignMasterAsync(int requestId,int masterId);
    Task UpdateStatusAsync(int requestId, RequestStatus newStatus, int userId);
-   Task<IEnumerable<RequestDto>> GetAllAsync();
+   Task<List<RequestDto>> GetAllRequestsByCompanyIdAsync(int companyId,int page,int size,RequestStatus? status);
    Task<IEnumerable<RequestStatusHistoryDto>> GetStatusHistoryAsync(int requestId);
 }

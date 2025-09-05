@@ -11,5 +11,5 @@ public interface IRequestRepository
     Task CreateRequestAsync(Request? request);
     Task UpdateRequestAsync(Request? request);
     Task DeleteRequstAsync(int id);
-
+    Task<List<Request>?> GetAllRequestByCompanyIdAsync(int companyId,int page,int size,RequestStatus? status);
 }

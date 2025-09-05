@@ -54,4 +54,20 @@ public class RequestRepository(ApplicationDbContext context):IRequestRepository
         }
         
     }
+
+    public async Task<List<Request>?> GetAllRequestByCompanyIdAsync(int companyId, int page, int size, RequestStatus? status)
+    {
+        var requests = context.Requests
+            .Where(r => r.CompanyId == companyId);
+
+        if (status != null)
+        {
+            requests = requests.Where(r => r.Status == status.Value);
+        }
+        return await requests
+            .OrderBy(r=>r.Status)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync();
+    }
 }

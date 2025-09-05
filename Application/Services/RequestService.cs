@@ -146,6 +146,23 @@ public class RequestService(
             ChangedAt = DateTime.UtcNow
         });
     }
+    
+    public async Task<List<RequestDto>> GetAllRequestsByCompanyIdAsync(int companyId, int page, int size, RequestStatus? status)
+    {
+        var requests=await requestRepository.GetAllRequestByCompanyIdAsync(companyId, page, size, status);
+        return requests.Select(r=>new RequestDto
+        {
+            Id = r.Id,
+            EquipmentId = r.EquipmentId,
+            Description = r.Description,
+            Phone = r.Phone,
+            DateFrom = r.DateFrom,
+            DateTo = r.DateTo,
+            CreatedByAdminId = r.CreatedByAdminId,
+            AssignedMasterId = r.AssignedMasterId,
+        }).ToList();
+    }
+
     public async Task<IEnumerable<RequestStatusHistoryDto>> GetStatusHistoryAsync(int requestId)
     {
        var history=await requestStatusHistoryRepository.GetByRequestIdAsync(requestId);
