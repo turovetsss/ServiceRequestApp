@@ -10,6 +10,8 @@ public interface IUserRepository
     Task<IEnumerable<User?>> GetAllAsync();
     Task<User?> GetUserByEmailAsync(string email);
     Task CreateUserAsync(User? user);
+    Task<List<User>> GetMastersByCompanyIdAsync(int companyId,int page,int size, bool? isActive = null);
+    Task<User?> GetMastersByIdAsync(int id,int companyId);
     Task UpdateUserAsync(User? user);
-    Task DeleteUserAsync(int id);
+    Task<int> GetMasterCountAsyncByCompanyId(int companyId,bool? isActive = null);
 }

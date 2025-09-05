@@ -8,4 +8,5 @@ public class UserDto
     public string Email { get; set; }
     public UserRole Role { get; set; }
     public int CompanyId { get; set; }
+    public bool IsActive { get; set; }
 }

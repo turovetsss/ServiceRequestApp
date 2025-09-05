@@ -28,10 +28,40 @@ public class UserRepository(ApplicationDbContext context):IUserRepository
         context.Users.Add(user);
         await context.SaveChangesAsync();
     }
+    
+
+    public async Task<List<User>> GetMastersByCompanyIdAsync(int companyId, int page, int size, bool? isActive = null)
+    {
+        var masters = context.Users
+            .Where(u => u.CompanyId == companyId && u.Role == UserRole.Master);
+        return await masters
+            .OrderBy(u => u.Email)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync();
+    }
+
+    public async Task<User?> GetMastersByIdAsync(int id, int companyId)
+    {
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Id == id && u.CompanyId == companyId && u.Role == UserRole.Master);
+    }
+
     public async Task UpdateUserAsync(User? user)
     {
         context.Users.Update(user);
         await context.SaveChangesAsync();
+    }
+
+    public async Task<int> GetMasterCountAsyncByCompanyId(int companyId, bool? isActive = null)
+    {
+        var count = context.Users
+            .Where(u => u.CompanyId == companyId && u.Role == UserRole.Master);
+        if (isActive != null)
+        {
+            count = count.Where(u => u.IsActive == isActive.Value);
+        }
+        return await count.CountAsync();
     }
 
     public async Task DeleteUserAsync(int id)
