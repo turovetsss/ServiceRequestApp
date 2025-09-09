@@ -79,7 +79,7 @@ public class ApplicationDbContext: DbContext
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<RequestPhoto>()
             .HasOne(rp => rp.Request)
-            .WithMany(r => r.ProblemPhotos)
+            .WithMany(r => r.Photos)
             .HasForeignKey(rp => rp.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<CompletedWorkPhoto>()

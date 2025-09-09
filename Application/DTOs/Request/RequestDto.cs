@@ -14,7 +14,7 @@ public class RequestDto
     public string Status { get; set; }
     public int CreatedByAdminId { get; set; }
     public int? AssignedMasterId { get; set; }
-    public List<RequestPhotoDto> ProblemPhotos { get; set; } = new();
+    public List<RequestPhotoDto> Photos { get; set; } = new();
     public List<CompletedWorkPhotoDto> CompletedWorkPhotos { get; set; } = new();
     public List<DocumentDto> Documents { get; set; } = new();
     public List<RequestStatusHistoryDto> StatusHistory { get; set; } = new();

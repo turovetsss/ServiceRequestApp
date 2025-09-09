@@ -4,6 +4,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
 using RequestStatus = Domain.Entities.RequestStatus;
+using IRequestPhotoRepository = Application.Interfaces.IRequestPhotoRepository;
 
 namespace Application.Services;
 
@@ -11,12 +12,21 @@ public class RequestService(
     IEquipmentRepository equipmentRepository,
     IUserRepository userRepository,
     IRequestRepository requestRepository,
-    IRequestStatusHistoryRepository requestStatusHistoryRepository)
+    IRequestStatusHistoryRepository requestStatusHistoryRepository,
+    IRequestPhotoRepository photoRepository,
+    ICompanyRepository companyRepository)
     : IRequestService
 {
     
     public async Task<RequestDto> CreateRequestAsync(CreateRequestDto createRequestDto, int companyId, int adminId)
     {
+        // Validate that the company exists
+        var company = await companyRepository.GetCompanyByIdAsync(companyId);
+        if (company == null)
+        {
+            throw new ArgumentException($"Company with ID {companyId} does not exist.");
+        }
+
         var request = new Request
         {
             CompanyId = companyId,
@@ -38,7 +48,7 @@ public class RequestService(
             DateFrom = request.DateFrom,
             DateTo = request.DateTo,
             CreatedByAdminId = request.CreatedByAdminId,
-            ProblemPhotos = request.ProblemPhotos.Select(p => new RequestPhotoDto
+            Photos = request.Photos.Select(p => new RequestPhotoDto
             {
                 Id = p.Id,
                 PhotoUrl = p.PhotoUrl
@@ -62,7 +72,7 @@ public class RequestService(
             Status = request.Status.ToString(),
             CreatedByAdminId = request.CreatedByAdminId,
             AssignedMasterId = request.AssignedMasterId,
-            ProblemPhotos = request.ProblemPhotos.Select(p => new RequestPhotoDto
+            Photos = request.Photos.Select(p => new RequestPhotoDto
             {
                 Id = p.Id,
                 PhotoUrl = p.PhotoUrl
@@ -175,6 +185,38 @@ public class RequestService(
            ChangedByUserId = h.ChangedByUserId,
        });
     }
+
+    public async Task RemoveRequestPhotoAsync(int photoId)
+    {
+        var photo = await photoRepository.GetByIdAsync(photoId);
+        if (photo == null) throw new Exception("Photo not found");
+        
+        var photoDto = new RequestPhotoDto
+        {
+            Id = photo.Id,
+            RequestId = photo.RequestId,
+            PhotoUrl = photo.PhotoUrl,
+            ObjectKey = photo.ObjectKey
+        };
+        
+        await photoRepository.DeleteAsync(photoDto);
+        await photoRepository.SaveChangesAsync();
+    }
+
+    public async Task AddRequestPhotoAsync(int requestId, string photoUrl, string objectKey)
+    {
+        var request = await requestRepository.GetRequestByIdAsync(requestId);
+        if (request == null) throw new Exception("Equipment not found");
+        var photo = new RequestPhotoDto
+        {
+            RequestId = requestId,
+            PhotoUrl = photoUrl,
+            ObjectKey = objectKey
+        };
+        await photoRepository.AddAsync(photo);
+        await photoRepository.SaveChangesAsync();
+    }
+
     public async Task<IEnumerable<RequestDto>> GetAllAsync()
     {
         var requests = await requestRepository.GetAllAsync();

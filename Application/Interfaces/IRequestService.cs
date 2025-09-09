@@ -15,4 +15,6 @@ public interface IRequestService
    Task UpdateStatusAsync(int requestId, RequestStatus newStatus, int userId);
    Task<List<RequestDto>> GetAllRequestsByCompanyIdAsync(int companyId,int page,int size,RequestStatus? status);
    Task<IEnumerable<RequestStatusHistoryDto>> GetStatusHistoryAsync(int requestId);
+   Task RemoveRequestPhotoAsync(int photoId);
+   Task AddRequestPhotoAsync(int requestId, string photoUrl, string objectKey);
 }

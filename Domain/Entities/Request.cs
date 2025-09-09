@@ -14,7 +14,7 @@ public class Request
     public RequestStatus Status { get; set; }
     public int CreatedByAdminId { get; set; }
     public int? AssignedMasterId { get; set; }
-    public ICollection<RequestPhoto> ProblemPhotos { get; set; } = new List<RequestPhoto>();
+    public ICollection<RequestPhoto> Photos { get; set; } = new List<RequestPhoto>();
     public ICollection<CompletedWorkPhoto> CompletedWorkPhotos { get; set; } = new List<CompletedWorkPhoto>();
     public ICollection<Document> Documents { get; set; } = new List<Document>();
     public ICollection<RequestStatusHistory> StatusHistory { get; set; } = new List<RequestStatusHistory>();

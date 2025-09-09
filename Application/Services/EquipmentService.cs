@@ -86,7 +86,6 @@ public class EquipmentService(IEquipmentRepository equipmentRepository, IEquipme
         var photo = await photoRepository.GetByIdAsync(photoId);
         if (photo == null) throw new Exception("Photo not found");
         
-        // Convert to DTO for the Application layer interface
         var photoDto = new EquipmentPhotoDto
         {
             Id = photo.Id,

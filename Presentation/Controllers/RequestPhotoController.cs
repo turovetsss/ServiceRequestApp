@@ -4,22 +4,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace Presentation.Controllers;
 
 [ApiController]
-[Route("api/equipment-photos")]
-public class EquipmentPhotoController: ControllerBase
+[Route("api/request-photos")]
+public class RequestPhotoController: ControllerBase
 {
-    private const string Bucket = "equipment-photos";
+    private const string Bucket = "request-photos";
     private readonly IFileStorageService storage;
-    private readonly IEquipmentService equipmentService;
+    private readonly IRequestService requestService;
 
-    public EquipmentPhotoController(IFileStorageService storage, IEquipmentService equipmentService)
+    public RequestPhotoController(IFileStorageService storage, IRequestService requestService)
     {
         this.storage = storage;
-        this.equipmentService = equipmentService;
+        this.requestService = requestService;
     }
 
-    [HttpPost("{equipmentId:int}/photos")]
+    [HttpPost("{requestId:int}/photos")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Upload(int equipmentId, List<IFormFile> files, CancellationToken ct)
+    public async Task<IActionResult> Upload(int requestId, List<IFormFile> files, CancellationToken ct)
     {
         if (files == null || files.Count == 0) return BadRequest("No files");
 
@@ -28,12 +28,12 @@ public class EquipmentPhotoController: ControllerBase
         {
             if (file.Length == 0) continue;
             var ext = Path.GetExtension(file.FileName);
-            var key = $"{equipmentId}/{DateTime.UtcNow:yyyy/MM}/{Guid.NewGuid()}{ext}";
+            var key = $"{requestId}/{DateTime.UtcNow:yyyy/MM}/{Guid.NewGuid()}{ext}";
 
             await using var stream = file.OpenReadStream();
             var url = await storage.UploadAsync(stream, file.ContentType, Bucket, key, ct);
 
-            await equipmentService.AddEquipmentPhotoAsync(equipmentId, url, key);
+            await requestService.AddRequestPhotoAsync(requestId, url, key);
             result.Add(url);
         }
 
@@ -44,7 +44,7 @@ public class EquipmentPhotoController: ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int photoId, CancellationToken ct)
     {
-        await equipmentService.RemoveEquipmentPhotoAsync(photoId);
+        await requestService.RemoveRequestPhotoAsync(photoId);
         return NoContent();
     }
 }

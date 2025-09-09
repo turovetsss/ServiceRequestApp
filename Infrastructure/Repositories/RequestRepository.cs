@@ -11,7 +11,7 @@ public class RequestRepository(ApplicationDbContext context):IRequestRepository
         return await context.Requests
             .Include(r => r.Company)
             .Include(r => r.Equipment)
-            .Include(e => e.ProblemPhotos)
+            .Include(e => e.Photos)
             .Include(r => r.CreatedByAdmin)
             .Include(r => r.AssignedMaster)
             .Include(r => r.CompletedWorkPhotos)

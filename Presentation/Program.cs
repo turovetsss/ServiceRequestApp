@@ -48,6 +48,8 @@ builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio
 builder.Services.AddSingleton<IFileStorageService, MinioStorageService>();
 builder.Services.AddScoped<Domain.Interfaces.IEquipmentPhotoRepository, Infrastructure.Repositories.EquipmentPhotoRepository>();
 builder.Services.AddScoped<Application.Interfaces.IEquipmentPhotoRepository, Application.Services.EquipmentPhotoRepository>();
+builder.Services.AddScoped<Domain.Interfaces.IRequestPhotoRepository, Infrastructure.Repositories.RequestPhotoRepository>();
+builder.Services.AddScoped<Application.Interfaces.IRequestPhotoRepository, Application.Services.RequestPhotoRepository>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();

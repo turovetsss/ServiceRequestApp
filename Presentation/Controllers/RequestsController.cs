@@ -13,29 +13,32 @@ using RequestStatus = Domain.Entities.RequestStatus;
 namespace Presentation.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class RequestsController(IRequestService requestService) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(RequestDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateRequest([FromBody] CreateRequestDto createDto)
     {
         var companyId = int.Parse(User.FindFirst("CompanyId").Value);
-        var adminId = int.Parse(User.FindFirst("UserId").Value);
+        var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         
         var request = await requestService.CreateRequestAsync(createDto, companyId, adminId);
         return CreatedAtAction(nameof(GetRequest), new { id = request.Id }, request);
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(List<RequestDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRequests([FromQuery] int page = 1, [FromQuery] int pageSize = 10,
         [FromQuery] RequestStatus? status = null)
     {
         var companyId = int.Parse(User.FindFirst("CompanyId").Value);
         var ifisMaster = User.IsInRole("Master");
-        var userId = int.Parse(User.FindFirst("UserId").Value);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         List<RequestDto> requests = null;
         if (ifisMaster)
         {
@@ -57,6 +60,7 @@ public class RequestsController(IRequestService requestService) : ControllerBase
     }
 
     [HttpPatch("{id}/status")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDto updateStatusDto)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
