@@ -2,10 +2,11 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using IEquipmentPhotoRepository = Application.Interfaces.IEquipmentPhotoRepository;
 
 namespace Application.Services;
 
-public class EquipmentService(IEquipmentRepository equipmentRepository):IEquipmentService
+public class EquipmentService(IEquipmentRepository equipmentRepository, IEquipmentPhotoRepository photoRepository) : IEquipmentService
 {
     public async Task<EquipmentDto> GetEquipmentByIdAsync(int id)
     {
@@ -29,8 +30,7 @@ public class EquipmentService(IEquipmentRepository equipmentRepository):IEquipme
             Name = e.Name,
             Description = e.Description,
         }).ToList();
-    
-}
+    }
 
     public async Task<EquipmentDto> CreateEquipmentAsync(CreateEquipmentDto createDto, int companyId)
     {
@@ -66,13 +66,36 @@ public class EquipmentService(IEquipmentRepository equipmentRepository):IEquipme
         await equipmentRepository.DeleteEquipmentAsync(id);
     }
 
-    public Task AddEquipmentPhotoAsync(int equipmentId, string photoUrl)
+    public async Task AddEquipmentPhotoAsync(int equipmentId, string photoUrl, string objectKey)
     {
-        throw new NotImplementedException();
+        var equipment = await equipmentRepository.GetEquipmentByIdAsync(equipmentId);
+        if (equipment == null) throw new Exception("Equipment not found");
+        var photo = new EquipmentPhotoDto
+        {
+            EquipmentId = equipmentId,
+            PhotoUrl = photoUrl,
+            ObjectKey = objectKey
+        };
+        await photoRepository.AddAsync(photo);
+        await photoRepository.SaveChangesAsync();
     }
 
-    public Task RemoveEquipmentPhotoAsync(int photoId)
+
+    public async Task RemoveEquipmentPhotoAsync(int photoId)
     {
-        throw new NotImplementedException();
+        var photo = await photoRepository.GetByIdAsync(photoId);
+        if (photo == null) throw new Exception("Photo not found");
+        
+        // Convert to DTO for the Application layer interface
+        var photoDto = new EquipmentPhotoDto
+        {
+            Id = photo.Id,
+            EquipmentId = photo.EquipmentId,
+            PhotoUrl = photo.PhotoUrl,
+            ObjectKey = photo.ObjectKey
+        };
+        
+        await photoRepository.DeleteAsync(photoDto);
+        await photoRepository.SaveChangesAsync();
     }
 }

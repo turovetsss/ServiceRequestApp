@@ -11,7 +11,9 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Domain.Entities;
 using Npgsql;
+using Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
+using IEquipmentPhotoRepository = Application.Interfaces.IEquipmentPhotoRepository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,8 +44,11 @@ builder.Services.AddAuthentication(options =>
         };
     });
 builder.Services.AddAuthorization();
+builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
+builder.Services.AddSingleton<IFileStorageService, MinioStorageService>();
+builder.Services.AddScoped<Domain.Interfaces.IEquipmentPhotoRepository, Infrastructure.Repositories.EquipmentPhotoRepository>();
+builder.Services.AddScoped<Application.Interfaces.IEquipmentPhotoRepository, Application.Services.EquipmentPhotoRepository>();
 builder.Services.AddScoped<IEquipmentService, EquipmentService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();

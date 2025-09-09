@@ -40,6 +40,11 @@ public class ApplicationDbContext: DbContext
                 .WithOne(r => r.Company)
                 .HasForeignKey(r => r.CompanyId);
         });
+        modelBuilder.Entity<Equipment>()
+            .HasMany(e => e.Photos)
+            .WithOne(p => p.Equipment)
+            .HasForeignKey(p => p.EquipmentId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Request>(entity =>
         {
             entity.HasOne(r => r.CreatedByAdmin)
