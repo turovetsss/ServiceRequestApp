@@ -312,8 +312,10 @@ public class RequestService(
             throw new Exception($"There are no photos in request {requestId}");
         }
 
-        foreach (var url in photoUrls)
-        {
+       if(photoUrls!=null && photoUrls.Count>0)
+       {
+           foreach (var url in photoUrls)
+             {
             var photo = new CompletedWorkPhoto
             {
                 RequestId = requestId,
@@ -321,6 +323,7 @@ public class RequestService(
             };
             await completedWorkPhotoRepository.AddAsync(photo);
         }
+       }
 
         var oldStatus = request.Status;
         request.Status = RequestStatus.WorkCompleted;
