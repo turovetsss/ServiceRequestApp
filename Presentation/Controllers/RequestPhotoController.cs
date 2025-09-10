@@ -7,6 +7,7 @@ namespace Presentation.Controllers;
 [Route("api/request-photos")]
 public class RequestPhotoController: ControllerBase
 {
+    
     private const string Bucket = "request-photos";
     private readonly IFileStorageService storage;
     private readonly IRequestService requestService;

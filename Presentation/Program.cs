@@ -13,6 +13,8 @@ using Domain.Entities;
 using Npgsql;
 using Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using Presentation.Filters;
 using IEquipmentPhotoRepository = Application.Interfaces.IEquipmentPhotoRepository;
 
 
@@ -54,6 +56,8 @@ builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<Domain.Interfaces.ICompletedWorkPhotoRepository, CompletedWorkPhotoRepository>();
+builder.Services.AddScoped<Application.Interfaces.ICompletedWorkPhotoRepository, Application.Services.CompletedWorkPhotoService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
@@ -88,10 +92,36 @@ builder.Services.AddSwaggerGen(c =>
             new string[] { }
         }
     });
+    
+    // Configure file upload support
+    c.MapType<IFormFile>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "binary"
+    });
+    
+    c.MapType<IFormFile[]>(() => new OpenApiSchema
+    {
+        Type = "array",
+        Items = new OpenApiSchema
+        {
+            Type = "string",
+            Format = "binary"
+        }
+    });
+
+    c.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        if (apiDesc.ActionDescriptor.DisplayName?.Contains("UploadCompletedPhoto") == true ||
+            apiDesc.ActionDescriptor.DisplayName?.Contains("UploadCompletedWorkPhotos") == true)
+        {
+            return false;
+        }
+        return true;
+    });
 });
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

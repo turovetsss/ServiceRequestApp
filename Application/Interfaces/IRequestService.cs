@@ -17,4 +17,9 @@ public interface IRequestService
    Task<IEnumerable<RequestStatusHistoryDto>> GetStatusHistoryAsync(int requestId);
    Task RemoveRequestPhotoAsync(int photoId);
    Task AddRequestPhotoAsync(int requestId, string photoUrl, string objectKey);
+   
+   Task<Request> MasterAcceptRequestAsync(int requestId, int masterId);
+   Task<Request> MasterStartWorkAsync(int requestId, int masterId);
+   Task<Request> MasterCompletedWorkAsync(int requestId, int masterId, List<string> photoUrls);
+   Task<List<Request>> MasterGetAvailableRequestsAsync(int masterId, RequestStatus? status, int page = 1, int size = 10);
 }

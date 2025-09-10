@@ -3,6 +3,7 @@ using Application.DTOs.Request;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using ICompletedWorkPhotoRepository = Application.Interfaces.ICompletedWorkPhotoRepository;
 using RequestStatus = Domain.Entities.RequestStatus;
 using IRequestPhotoRepository = Application.Interfaces.IRequestPhotoRepository;
 
@@ -14,7 +15,8 @@ public class RequestService(
     IRequestRepository requestRepository,
     IRequestStatusHistoryRepository requestStatusHistoryRepository,
     IRequestPhotoRepository photoRepository,
-    ICompanyRepository companyRepository)
+    ICompanyRepository companyRepository,
+    ICompletedWorkPhotoRepository completedWorkPhotoRepository)
     : IRequestService
 {
     
@@ -217,6 +219,123 @@ public class RequestService(
         await photoRepository.SaveChangesAsync();
     }
 
+    public async Task<Request> MasterAcceptRequestAsync(int requestId, int masterId)
+    {
+       var request=await requestRepository.GetRequestByIdAsync(requestId);
+       if (request == null) throw new Exception("Equipment not found");
+       if (request.Status != RequestStatus.Sent)
+       {
+           throw new Exception($"Request {requestId} has already been sent");
+       }
+       
+       var master = await userRepository.GetByIdAsync(masterId);
+       if (master == null || master.Role != UserRole.Master)
+       {
+           throw new Exception($"Invalid master id {masterId}");
+       }
+       var oldStatus = request.Status;
+       request.Status=RequestStatus.MasterAssigned;
+       request.AssignedMasterId = masterId;
+       
+       await requestRepository.UpdateRequestAsync(request);
+
+       await requestStatusHistoryRepository.AddAsync(new RequestStatusHistory
+       {
+           RequestId = requestId,
+           OldStatus = oldStatus,
+           NewStatus = oldStatus,
+           ChangedByUserId = masterId,
+           ChangedAt = DateTime.UtcNow
+       });
+       return request;
+    }
+
+    public async  Task<Request> MasterStartWorkAsync(int requestId, int masterId)
+    {
+       var request=await requestRepository.GetRequestByIdAsync(requestId);
+       if (request == null) throw new Exception("Requst not found");
+       if (request.AssignedMasterId != masterId)
+       {
+           throw new Exception($"Only assigned master is allowed to request {requestId}");
+       }
+       if (request.Status != RequestStatus.MasterAssigned)
+       {
+           throw new Exception($"Only request with 'MasterAssigned' status can be started'");
+       }
+       var oldStatus = request.Status;
+       request.Status = RequestStatus.InProgress;
+       await requestRepository.UpdateRequestAsync(request);
+
+       await requestStatusHistoryRepository.AddAsync(new RequestStatusHistory
+       {
+           RequestId = requestId,
+           OldStatus = oldStatus,
+           NewStatus = oldStatus,
+           ChangedByUserId = masterId,
+           ChangedAt = DateTime.UtcNow
+       });
+       return request;
+    }
+    
+    public async Task<Request> MasterCompletedWorkAsync(int requestId, int masterId, List<string> photoUrls)
+    {
+        var request=await requestRepository.GetRequestByIdAsync(requestId);
+        if (request == null) throw new Exception("Requst not found");
+        if (request.AssignedMasterId != masterId)
+        {
+            throw new Exception($"Only assigned master can complete work with {requestId}");
+        }
+        if (request.Status != RequestStatus.InProgress)
+        {
+            throw new Exception($"Only request with 'InProgress' status can be started'");
+        }
+
+        if (photoUrls == null || photoUrls.Count == 0)
+        {
+            throw new Exception($"There are no photos in request {requestId}");
+        }
+
+        foreach (var url in photoUrls)
+        {
+            var photo = new CompletedWorkPhoto
+            {
+                RequestId = requestId,
+                PhotoUrl = url
+            };
+            await completedWorkPhotoRepository.AddAsync(photo);
+        }
+
+        var oldStatus = request.Status;
+        request.Status = RequestStatus.WorkCompleted;
+    
+        await requestRepository.UpdateRequestAsync(request);
+
+        await requestStatusHistoryRepository.AddAsync(new RequestStatusHistory
+        {
+            RequestId = requestId,
+            OldStatus = oldStatus,
+            NewStatus = RequestStatus.WorkCompleted,
+            ChangedByUserId = masterId,
+            ChangedAt = DateTime.UtcNow
+        });
+        return request;
+    }
+
+
+    public async Task<List<Request>> MasterGetAvailableRequestsAsync(int masterId, RequestStatus? status, int page = 1,
+        int size = 10)
+    {
+        var master=await userRepository.GetByIdAsync(masterId);
+        if(master == null) throw new Exception("Master not found");
+
+        return await requestRepository.GetAllRequestByCompanyIdAsync(
+            master.CompanyId,
+            page,
+            size,
+            RequestStatus.Sent
+            );
+    }
+ 
     public async Task<IEnumerable<RequestDto>> GetAllAsync()
     {
         var requests = await requestRepository.GetAllAsync();
