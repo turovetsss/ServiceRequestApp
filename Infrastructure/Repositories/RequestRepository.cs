@@ -55,6 +55,21 @@ public class RequestRepository(ApplicationDbContext context):IRequestRepository
         
     }
 
+    public async Task<List<Request>> GetAssignedToMasterAsync(int masterId, RequestStatus? status, int page, int size)
+    {
+        var query = context.Requests
+            .Where(r => r.AssignedMasterId == masterId)
+            .Include(r => r.AssignedMaster)
+            .Include(r => r.Company)
+            .Include(r => r.Photos)
+            .Include(r=>r.StatusHistory)
+            .OrderBy(r => r.Id);
+        return await query
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync();
+    }
+
     public async Task<List<Request>?> GetAllRequestByCompanyIdAsync(int companyId, int page, int size, RequestStatus? status)
     {
         var requests = context.Requests

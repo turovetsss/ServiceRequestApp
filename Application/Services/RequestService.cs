@@ -22,7 +22,6 @@ public class RequestService(
     
     public async Task<RequestDto> CreateRequestAsync(CreateRequestDto createRequestDto, int companyId, int adminId)
     {
-        // Validate that the company exists
         var company = await companyRepository.GetCompanyByIdAsync(companyId);
         if (company == null)
         {
@@ -219,6 +218,24 @@ public class RequestService(
         await photoRepository.SaveChangesAsync();
     }
 
+    public async Task<List<RequestDto>> GetAssignedRequestsAsync(int masterId, RequestStatus? status, int page, int size)
+    {
+        var requests=await requestRepository.GetAssignedToMasterAsync(masterId, status, page, size);
+        return requests.Select(requests=>new RequestDto
+        {
+            Id = requests.Id,
+            EquipmentId = requests.EquipmentId,
+            Description = requests.Description,
+            Phone = requests.Phone,
+            DateFrom = requests.DateFrom,
+            DateTo = requests.DateTo,
+            Status = requests.Status.ToString(),
+            AssignedMasterId = requests.AssignedMasterId,
+            CreatedByAdminId = requests.CreatedByAdminId,
+        }).ToList();
+    }
+
+  
     public async Task<Request> MasterAcceptRequestAsync(int requestId, int masterId)
     {
        var request=await requestRepository.GetRequestByIdAsync(requestId);
@@ -243,7 +260,7 @@ public class RequestService(
        {
            RequestId = requestId,
            OldStatus = oldStatus,
-           NewStatus = oldStatus,
+           NewStatus = RequestStatus.MasterAssigned,
            ChangedByUserId = masterId,
            ChangedAt = DateTime.UtcNow
        });
@@ -270,7 +287,7 @@ public class RequestService(
        {
            RequestId = requestId,
            OldStatus = oldStatus,
-           NewStatus = oldStatus,
+           NewStatus = RequestStatus.InProgress,
            ChangedByUserId = masterId,
            ChangedAt = DateTime.UtcNow
        });

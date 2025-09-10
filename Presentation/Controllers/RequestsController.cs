@@ -46,7 +46,7 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
         try
         {
             var masterId = GetCurrentUserId();
-            var requests = await requestService.MasterGetAvailableRequestsAsync(masterId, status, page, size);
+            var requests = await requestService.GetAssignedRequestsAsync(masterId, status, page, size);
             return Ok(requests);
         }
         catch (Exception ex)
@@ -79,6 +79,7 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
         }
     }
     [HttpPatch("{id}/master/start-work")]
+    [Authorize(Roles = "Master")]
     public async Task<ActionResult<Request>> StartWork(int id)
     {
         try
