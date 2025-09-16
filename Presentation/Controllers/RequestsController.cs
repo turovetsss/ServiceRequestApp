@@ -111,7 +111,7 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
     
 
     [HttpPost("{id}/upload-completed-photo")]
-    [Authorize(Roles = "Master,Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(List<CompletedWorkPhotoDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<CompletedWorkPhotoDto>>> UploadCompletedPhoto(int id, [FromForm] List<IFormFile> files)
@@ -124,8 +124,8 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
         if (request == null)
             return NotFound($"Request with id {id} not found");
         
-                //   if (request.Status != "InProgress")
-           // return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
+        if (request.Status != "InProgress") 
+            return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
 
         var result = new List<CompletedWorkPhotoDto>();
         foreach (var file in files)
@@ -162,6 +162,8 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
         }
 
         await completedWorkPhotoRepository.SaveChangesAsync();
+        var userId = GetCurrentUserId();
+        await requestService.UpdateStatusAsync(id, RequestStatus.WorkCompleted, userId);
         return Ok(result);
     }
 
