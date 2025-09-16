@@ -4,22 +4,22 @@ using Microsoft.AspNetCore.Mvc;
 namespace Presentation.Controllers;
 
 [ApiController]
-[Route("api/request-photos")]
-public class RequestPhotoController: ControllerBase
+[Route("api/completed-work-photos")]
+public class CompletedWorkPhotoController:ControllerBase
 {
-    
-    private const string Bucket = "request-photos";
+
+    private const string Bucket = "completed-work-photos";
     private readonly IFileStorageService storage;
     private readonly IRequestService requestService;
 
-    public RequestPhotoController(IFileStorageService storage, IRequestService requestService)
+    public CompletedWorkPhotoController(IFileStorageService storage, IRequestService requestService)
     {
         this.storage = storage;
         this.requestService = requestService;
     }
 
     [HttpPost("{requestId:int}/photos")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Master")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Upload(int requestId, List<IFormFile> files, CancellationToken ct)
@@ -44,7 +44,7 @@ public class RequestPhotoController: ControllerBase
     }
 
     [HttpDelete("photos/{photoId:int}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Master")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(int photoId, CancellationToken ct)
@@ -52,4 +52,5 @@ public class RequestPhotoController: ControllerBase
         await requestService.RemoveRequestPhotoAsync(photoId);
         return NoContent();
     }
+   
 }

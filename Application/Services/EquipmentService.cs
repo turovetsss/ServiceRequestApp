@@ -63,6 +63,7 @@ public class EquipmentService(IEquipmentRepository equipmentRepository, IEquipme
     public async Task DeleteEquipmentAsync(int id)
     {
         var equipment=await equipmentRepository.GetEquipmentByIdAsync(id);
+        if (equipment == null) throw new Exception("Equipment not found");
         await equipmentRepository.DeleteEquipmentAsync(id);
     }
 

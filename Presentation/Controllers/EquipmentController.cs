@@ -13,6 +13,8 @@ namespace Presentation.Controllers;
 public class EquipmentController(IEquipmentService equipmentService):ControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<EquipmentDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(IEnumerable<EquipmentDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllEquipment()
     {

@@ -110,15 +110,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    c.DocInclusionPredicate((docName, apiDesc) =>
-    {
-        if (apiDesc.ActionDescriptor.DisplayName?.Contains("UploadCompletedPhoto") == true ||
-            apiDesc.ActionDescriptor.DisplayName?.Contains("UploadCompletedWorkPhotos") == true)
-        {
-            return false;
-        }
-        return true;
-    });
+  c.OperationFilter<FileUploadOperationFilter>();
 });
 var app = builder.Build();
 

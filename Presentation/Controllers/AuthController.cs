@@ -9,6 +9,8 @@ namespace Presentation.Controllers;
 public class AuthController(IAuthService authService):ControllerBase
 {
     [HttpPost("register-admin")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponseDto>> RegisterAdmin(RegisterDto registerDto)
     {
         var response = await authService.RegisterAdminAsync(registerDto);
@@ -16,6 +18,8 @@ public class AuthController(IAuthService authService):ControllerBase
     }
 
     [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
     {
         try

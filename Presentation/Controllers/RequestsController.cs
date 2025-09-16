@@ -20,6 +20,7 @@ namespace Presentation.Controllers;
 public class RequestsController(IRequestService requestService, IFileStorageService fileStorageService, Application.Interfaces.ICompletedWorkPhotoRepository completedWorkPhotoRepository) : ControllerBase
 {
     private const string CompletedWorkBucket= "completed-work-photos";
+    
     private int GetCurrentUserId()
     {
         return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -38,6 +39,8 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
     }
     [HttpGet("Master/assigned-to-me")]
     [Authorize(Roles = "Master")]
+    [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<Request>>> GetAssignedRequests(
         [FromQuery] RequestStatus? status, 
         [FromQuery] int page = 1, 
@@ -56,6 +59,8 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
     }
     [HttpPatch("{id}/master/accept")]
     [Authorize(Roles = "Master")]
+    [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Request>> AcceptRequest(int id)
     {
         try
@@ -80,6 +85,8 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
     }
     [HttpPatch("{id}/master/start-work")]
     [Authorize(Roles = "Master")]
+    [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Request>> StartWork(int id)
     {
         try
@@ -101,48 +108,30 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
-    [HttpPost("{id}/complete-work")]
-    [Authorize(Roles = "Master")]
-    public async Task<ActionResult<Request>> CompleteWork(int id, [FromBody] CompletedWorkDto dto)
-    {
-        try
-        {
-            var masterId = GetCurrentUserId();
-            var request = await requestService.MasterCompletedWorkAsync(id, masterId, dto.CompletedWorkPhotoUrls);
-            return Ok(request);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
     
-    }
 
-    [HttpPost("{id}/master/upload-completed-photo")]
-    [Authorize(Roles = "Master")]
-    public async Task<ActionResult<CompletedWorkPhotoDto>> UploadCompletedPhoto(int id, [FromForm] IFormFile file)
+    [HttpPost("{id}/upload-completed-photo")]
+    [Authorize(Roles = "Master,Admin")]
+    [ProducesResponseType(typeof(List<CompletedWorkPhotoDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<CompletedWorkPhotoDto>>> UploadCompletedPhoto(int id, [FromForm] List<IFormFile> files)
     {
-        try
+        if (files == null || files.Count == 0)
+            return BadRequest("No files");
+
+        var masterId = GetCurrentUserId();
+        var request = await requestService.GetRequestByIdAsync(id);
+        if (request == null)
+            return NotFound($"Request with id {id} not found");
+        
+                //   if (request.Status != "InProgress")
+           // return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
+
+        var result = new List<CompletedWorkPhotoDto>();
+        foreach (var file in files)
         {
-            var masterId = GetCurrentUserId();
-            var request = await requestService.GetRequestByIdAsync(id);
-            if (request == null)
-                return NotFound($"Request with id {id} not found");
-
-            if (request.AssignedMasterId != masterId)
-                return Forbid("Only assigned master can upload completed work photos");
-
-            if (request.Status != "InProgress")
-                return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
+            if (file.Length == 0)
+                continue;
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             using var stream = file.OpenReadStream();
@@ -157,103 +146,25 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
             {
                 RequestId = id,
                 PhotoUrl = photoUrl,
-                ObjectKey = fileName
+                ObjectKey = fileName,
+                CreatedAt = DateTime.UtcNow
             };
 
             await completedWorkPhotoRepository.AddAsync(completedWorkPhoto);
-            await completedWorkPhotoRepository.SaveChangesAsync();
-
-            var photoDto = new CompletedWorkPhotoDto
+            result.Add(new CompletedWorkPhotoDto
             {
                 Id = completedWorkPhoto.Id,
                 RequestId = completedWorkPhoto.RequestId,
                 PhotoUrl = completedWorkPhoto.PhotoUrl,
                 ObjectKey = completedWorkPhoto.ObjectKey,
                 CreatedAt = completedWorkPhoto.CreatedAt
-            };
+            });
+        }
 
-            return Ok(photoDto);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+        await completedWorkPhotoRepository.SaveChangesAsync();
+        return Ok(result);
     }
 
-    [HttpPost("{id}/completed-work-photos")]
-    [Authorize(Roles = "Master")]
-    [ProducesResponseType(typeof(List<CompletedWorkPhotoDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UploadCompletedWorkPhotos(int id, [FromForm] UploadCompletedWorkPhotosDto dto)
-    {
-        try
-        {
-            if (dto.Photos == null || dto.Photos.Length == 0)
-            {
-                return BadRequest("No photos provided");
-            }
-
-            var masterId = GetCurrentUserId();
-            var request = await requestService.GetRequestByIdAsync(id);
-            if (request == null)
-            {
-                return NotFound($"Request with ID {id} not found");
-            }
-
-            if (request.AssignedMasterId != masterId)
-            {
-                return Forbid("Only assigned master can upload completed work photos");
-            }
-
-            if (request.Status != "InProgress")
-            {
-                return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
-            }
-
-            var uploadedPhotos = new List<CompletedWorkPhotoDto>();
-
-            foreach (var file in dto.Photos)
-            {
-                if (file.Length == 0)
-                    continue;
-
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                using var stream = file.OpenReadStream();
-
-                var photoUrl = await fileStorageService.UploadAsync(
-                    stream,
-                    file.ContentType,
-                    "completed-work-photos",
-                    fileName);
-
-                var completedWorkPhoto = new CompletedWorkPhoto
-                {
-                    RequestId = id,
-                    PhotoUrl = photoUrl,
-                    ObjectKey = fileName
-                };
-
-                await completedWorkPhotoRepository.AddAsync(completedWorkPhoto);
-                await completedWorkPhotoRepository.SaveChangesAsync();
-
-                uploadedPhotos.Add(new CompletedWorkPhotoDto
-                {
-                    Id = completedWorkPhoto.Id,
-                    RequestId = completedWorkPhoto.RequestId,
-                    PhotoUrl = completedWorkPhoto.PhotoUrl,
-                    ObjectKey = completedWorkPhoto.ObjectKey,
-                    CreatedAt = completedWorkPhoto.CreatedAt
-                });
-            }
-
-            return Ok(uploadedPhotos);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
 
     [HttpGet]
     [Authorize(Roles = "Admin,Master")]

@@ -28,9 +28,9 @@ public class Request
 
 public enum RequestStatus
 {
-    Sent,
-    MasterAssigned,
-    InProgress,
-    WorkCompleted,
-    Closed
+    Sent=0,
+    MasterAssigned=1,
+    InProgress=2,
+    WorkCompleted=3,
+    Closed=4
 }

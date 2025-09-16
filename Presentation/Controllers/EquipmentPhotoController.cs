@@ -19,6 +19,8 @@ public class EquipmentPhotoController: ControllerBase
 
     [HttpPost("{equipmentId:int}/photos")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Upload(int equipmentId, List<IFormFile> files, CancellationToken ct)
     {
         if (files == null || files.Count == 0) return BadRequest("No files");
@@ -42,6 +44,8 @@ public class EquipmentPhotoController: ControllerBase
 
     [HttpDelete("photos/{photoId:int}")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(int photoId, CancellationToken ct)
     {
         await equipmentService.RemoveEquipmentPhotoAsync(photoId);

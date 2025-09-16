@@ -9,11 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Presentation.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class CompanyController(ICompanyService companyService):ControllerBase
 {
   
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CompanyDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCompany(int id)
@@ -25,6 +27,7 @@ public class CompanyController(ICompanyService companyService):ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CompanyDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCompany(int id, [FromBody] UpdateCompanyDto updateDto)

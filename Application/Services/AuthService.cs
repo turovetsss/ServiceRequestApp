@@ -41,6 +41,7 @@ public class AuthService(IUserRepository userRepository, ICompanyRepository comp
         {
             throw new UnauthorizedAccessException("Неверные логин или пароль");
         }
+        
         return GenerateJwtResponse(user);
     }
 
