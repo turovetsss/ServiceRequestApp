@@ -35,6 +35,13 @@ insert_final_newline = false
 # - https://github.com/RehanSaeed/EditorConfig/issues/60
 # some rules are from `analysislevel_7_all.editorconfig` and `analysislevelstyle_all.editorconfig`
 
+# Пустая строка перед операторами перехода (return, throw и др.)
+resharper_csharp_blank_lines_before_control_transfer_statements = 1
+blank_lines_before_control_transfer_statements = 1
+
+# Обязательные явные модификаторы доступа для всех членов, включая интерфейсы
+dotnet_style_require_accessibility_modifiers = always:warning
+
 csharp_indent_block_contents = true # related: IDE0055
 csharp_indent_braces = false # related: IDE0055
 csharp_indent_case_contents = true # related: IDE0055
@@ -130,7 +137,7 @@ dotnet_diagnostic.CA1024.severity = warning # Use properties where appropriate
 dotnet_diagnostic.CA1027.severity = warning # Mark enums with FlagsAttribute
 dotnet_diagnostic.CA1028.severity = silent # Enum Storage should be Int32 # maybe useful
 dotnet_diagnostic.CA1030.severity = warning # Use events where appropriate
-dotnet_diagnostic.CA1031.severity = warning # Do not catch general exception types
+dotnet_diagnostic.CA1031.severity = none # Do not catch general exception types
 dotnet_diagnostic.CA1032.severity = silent # Implement standard exception constructors
 dotnet_diagnostic.CA1033.severity = warning # Interface methods should be callable by child types
 dotnet_diagnostic.CA1034.severity = silent # Nested types should not be visible
@@ -523,7 +530,7 @@ dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 dotnet_naming_style.underscore_style.capitalization = camel_case
 dotnet_naming_style.underscore_style.required_prefix = _
 # default:
-dotnet_naming_rule.default_rule.severity = warning
+dotnet_naming_rule.default_rule.severity = none
 dotnet_naming_rule.default_rule.style = pascal_case_style
 dotnet_naming_rule.default_rule.symbols = default_symbols
 dotnet_naming_symbols.default_symbols.applicable_accessibilities = *

@@ -17,6 +17,7 @@ public class EquipmentController(IEquipmentService equipmentService) : Controlle
 	public async Task<IActionResult> GetAllEquipment()
 	{
 		var equipment = await equipmentService.GetAllEquipmentAsync();
+
 		return Ok(equipment);
 	}
 
@@ -42,6 +43,7 @@ public class EquipmentController(IEquipmentService equipmentService) : Controlle
 	{
 		var companyId = int.Parse(User.FindFirst("CompanyId").Value);
 		var equipment = await equipmentService.CreateEquipmentAsync(createEquipmentDto, companyId);
+
 		return CreatedAtAction(nameof(GetEquipmentById), new { id = equipment.Id }, equipment);
 	}
 
@@ -52,6 +54,7 @@ public class EquipmentController(IEquipmentService equipmentService) : Controlle
 	public async Task<IActionResult> UpdateEquipment(int id, [FromBody] UpdateEquipmentDto updateEquipmentDto)
 	{
 		var equipment = await equipmentService.UpdateEquipmentAsync(id, updateEquipmentDto);
+
 		return Ok(equipment);
 	}
 
@@ -61,6 +64,7 @@ public class EquipmentController(IEquipmentService equipmentService) : Controlle
 	public async Task<IActionResult> DeleteEquipment(int id)
 	{
 		await equipmentService.DeleteEquipmentAsync(id);
+
 		return NoContent();
 	}
 }

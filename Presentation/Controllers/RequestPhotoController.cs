@@ -57,6 +57,7 @@ public class RequestPhotoController : ControllerBase
 	public async Task<IActionResult> Delete(int photoId, CancellationToken ct)
 	{
 		await requestService.RemoveRequestPhotoAsync(photoId);
+
 		return NoContent();
 	}
 }

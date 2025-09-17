@@ -32,6 +32,7 @@ public class RequestsController(
 		var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
 		var request = await requestService.CreateRequestAsync(createDto, companyId, adminId);
+
 		return CreatedAtAction(nameof(GetRequest), new { id = request.Id }, request);
 	}
 
@@ -48,6 +49,7 @@ public class RequestsController(
 		{
 			var masterId = GetCurrentUserId();
 			var requests = await requestService.GetAssignedRequestsAsync(masterId, status, page, size);
+
 			return Ok(requests);
 		}
 		catch (Exception ex)
@@ -67,6 +69,7 @@ public class RequestsController(
 			var masterId = GetCurrentUserId();
 			var request = await
 				requestService.MasterAcceptRequestAsync(id, masterId);
+
 			return Ok(request);
 		}
 		catch (KeyNotFoundException ex)
@@ -93,6 +96,7 @@ public class RequestsController(
 		{
 			var masterId = GetCurrentUserId();
 			var request = await requestService.MasterStartWorkAsync(id, masterId);
+
 			return Ok(request);
 		}
 		catch (KeyNotFoundException ex)
@@ -169,6 +173,7 @@ public class RequestsController(
 		await completedWorkPhotoRepository.SaveChangesAsync();
 		var userId = GetCurrentUserId();
 		await requestService.UpdateStatusAsync(id, RequestStatus.WorkCompleted, userId);
+
 		return Ok(result);
 	}
 
@@ -199,6 +204,7 @@ public class RequestsController(
 	public async Task<IActionResult> AssignMaster(int id, [FromBody] AssignMasterDto assignMasterDto)
 	{
 		await requestService.AssignMasterAsync(id, assignMasterDto.UserId);
+
 		return Ok();
 	}
 
@@ -208,6 +214,7 @@ public class RequestsController(
 	{
 		var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 		await requestService.UpdateStatusAsync(id, updateStatusDto.NewStatus, userId);
+
 		return Ok();
 	}
 
@@ -215,6 +222,7 @@ public class RequestsController(
 	public async Task<IActionResult> GetStatusHistory(int id)
 	{
 		var history = await requestService.GetStatusHistoryAsync(id);
+
 		return Ok(history);
 	}
 
@@ -239,6 +247,7 @@ public class RequestsController(
 	public async Task<IActionResult> UpdateRequest(int id, [FromBody] UpdateRequestDto updateDto)
 	{
 		var request = await requestService.UpdateRequestAsync(id, updateDto);
+
 		return Ok(request);
 	}
 
@@ -248,6 +257,7 @@ public class RequestsController(
 	public async Task<IActionResult> DeleteRequest(int id)
 	{
 		await requestService.DeleteRequestAsync(id);
+
 		return NoContent();
 	}
 }

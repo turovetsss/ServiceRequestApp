@@ -38,6 +38,7 @@ public class UsersController(IUserService userService) : ControllerBase
 		}
 
 		var master = await userService.CreateMasterAsync(createMasterDto, companyId);
+
 		return Ok(master);
 	}
 
@@ -53,6 +54,7 @@ public class UsersController(IUserService userService) : ControllerBase
 		}
 
 		var result = await userService.GetMastersByCompanyAsync(companyId, page, size, isActive);
+
 		return Ok(result);
 	}
 
@@ -67,6 +69,7 @@ public class UsersController(IUserService userService) : ControllerBase
 		}
 
 		var master = await userService.GetMasterByIdAsync(id, companyId);
+
 		return Ok(master);
 	}
 
@@ -81,6 +84,7 @@ public class UsersController(IUserService userService) : ControllerBase
 		}
 
 		var master = await userService.UpdateMasterAsync(id, updateMasterDto, companyId);
+
 		return Ok(master);
 	}
 }

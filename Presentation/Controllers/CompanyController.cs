@@ -32,6 +32,7 @@ public class CompanyController(ICompanyService companyService) : ControllerBase
 	public async Task<IActionResult> UpdateCompany(int id, [FromBody] UpdateCompanyDto updateDto)
 	{
 		var company = await companyService.UpdateCompanyAsync(id, updateDto);
+
 		return Ok(company);
 	}
 }

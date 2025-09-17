@@ -57,6 +57,7 @@ public class EquipmentPhotoController : ControllerBase
 	public async Task<IActionResult> Delete(int photoId, CancellationToken ct)
 	{
 		await equipmentService.RemoveEquipmentPhotoAsync(photoId);
+
 		return NoContent();
 	}
 }

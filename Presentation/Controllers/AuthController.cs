@@ -14,6 +14,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 	public async Task<ActionResult<AuthResponseDto>> RegisterAdmin(RegisterDto registerDto)
 	{
 		var response = await authService.RegisterAdminAsync(registerDto);
+
 		return Ok(response);
 	}
 
@@ -25,6 +26,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 		try
 		{
 			var response = await authService.LoginAsync(loginDto);
+
 			return Ok(response);
 		}
 		catch (UnauthorizedAccessException ex)

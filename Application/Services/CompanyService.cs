@@ -21,7 +21,10 @@ public class CompanyService(ICompanyRepository companyRepository) : ICompanyServ
     {
         var company = await companyRepository.GetCompanyByIdAsync(companyId);
         if (updateCompanyDto.Name != null)
+        {
             company.Name = updateCompanyDto.Name;
+        }
+
         await companyRepository.UpdateCompanyAsync(company);
         return await GetCompanyByIdAsync(companyId);
     }
