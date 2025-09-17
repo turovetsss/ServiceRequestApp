@@ -2,5 +2,5 @@
 
 public class CompletedWorkDto
 {
-    public List<string> CompletedWorkPhotoUrls { get; set; } = new List<string>();
+    public List<string> CompletedWorkPhotoUrls { get; set; } = new();
 }

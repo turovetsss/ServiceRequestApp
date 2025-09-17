@@ -7,5 +7,5 @@ public class CreateRequestDto
     public string Phone { get; set; }
     public DateTime DateFrom { get; set; }
     public DateTime DateTo { get; set; }
-    public List<string> ProblemPhotoUrls { get; set; } = new(); 
+    public List<string> ProblemPhotoUrls { get; set; } = new();
 }

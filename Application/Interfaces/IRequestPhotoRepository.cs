@@ -1,5 +1,6 @@
-﻿using Domain.Entities;
-using Application.DTOs.Request;
+﻿using Application.DTOs.Request;
+using Domain.Entities;
+
 namespace Application.Interfaces;
 
 public interface IRequestPhotoRepository

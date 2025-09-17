@@ -1,14 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Domain.Entities;
+﻿using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class ApplicationDbContext: DbContext
+public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
-        : base(options) { }
-    protected ApplicationDbContext() : base() { }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
+
+    protected ApplicationDbContext()
+    {
+    }
 
     public DbSet<User> Users { get; set; }
     public DbSet<Company> Companies { get; set; }
@@ -105,7 +109,5 @@ public class ApplicationDbContext: DbContext
                 .HasForeignKey(rsh => rsh.ChangedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-        
     }
-    
 }

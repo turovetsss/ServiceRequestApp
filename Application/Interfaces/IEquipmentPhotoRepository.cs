@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Equipment;
 using Domain.Entities;
+
 namespace Application.Interfaces;
 
 public interface IEquipmentPhotoRepository

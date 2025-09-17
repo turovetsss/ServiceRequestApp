@@ -1,9 +1,10 @@
 ﻿using Application.DTOs.Request;
 using Application.Interfaces;
 using Domain.Entities;
+
 namespace Application.Services;
 
-public class RequestPhotoRepository:IRequestPhotoRepository
+public class RequestPhotoRepository : IRequestPhotoRepository
 {
     private readonly Domain.Interfaces.IRequestPhotoRepository _repository;
 
@@ -11,15 +12,16 @@ public class RequestPhotoRepository:IRequestPhotoRepository
     {
         _repository = repository;
     }
+
     public async Task<RequestPhoto?> GetByIdAsync(int id)
     {
         return await _repository.GetByIdAsync(id);
     }
 
-    public async  Task AddAsync(RequestPhotoDto photo)
+    public async Task AddAsync(RequestPhotoDto photo)
     {
-        var entity = new RequestPhoto()
-        { 
+        var entity = new RequestPhoto
+        {
             RequestId = photo.RequestId,
             PhotoUrl = photo.PhotoUrl,
             ObjectKey = photo.ObjectKey
@@ -30,10 +32,7 @@ public class RequestPhotoRepository:IRequestPhotoRepository
     public async Task DeleteAsync(RequestPhotoDto photo)
     {
         var entity = await _repository.GetByIdAsync(photo.Id);
-        if (entity != null)
-        {
-            await _repository.DeleteAsync(entity);
-        }
+        if (entity != null) await _repository.DeleteAsync(entity);
     }
 
     public async Task SaveChangesAsync()

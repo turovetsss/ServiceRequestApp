@@ -1,9 +1,9 @@
-﻿using Application.DTOs.Request;
-using Application.Interfaces;
+﻿using Application.Interfaces;
 using Domain.Entities;
+
 namespace Application.Services;
 
-public class CompletedWorkPhotoService:ICompletedWorkPhotoRepository
+public class CompletedWorkPhotoService : ICompletedWorkPhotoRepository
 {
     private readonly Domain.Interfaces.ICompletedWorkPhotoRepository _repository;
 
@@ -11,6 +11,7 @@ public class CompletedWorkPhotoService:ICompletedWorkPhotoRepository
     {
         _repository = repository;
     }
+
     public async Task<CompletedWorkPhoto?> GetByIdAsync(int id)
     {
         return await _repository.GetByIdAsync(id);

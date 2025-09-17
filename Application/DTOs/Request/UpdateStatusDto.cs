@@ -1,9 +1,8 @@
-﻿using Application.DTOs.Request;
-using Domain.Entities;
-using RequestStatus = Domain.Enums.RequestStatus;
+﻿using Domain.Entities;
 
 namespace Application.Dto.Request;
+
 public class UpdateStatusDto
 {
-    public Domain.Entities.RequestStatus NewStatus { get; set; }
+    public RequestStatus NewStatus { get; set; }
 }

@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
+
 namespace Domain.Interfaces;
-using System.Collections.Generic;
 
 public interface ICompletedWorkPhotoRepository
 {

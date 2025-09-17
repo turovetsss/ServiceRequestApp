@@ -2,9 +2,10 @@
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel.Args;
+
 namespace Infrastructure.Storage;
 
-public class MinioStorageService:IFileStorageService
+public class MinioStorageService : IFileStorageService
 {
     private readonly IMinioClient client;
     private readonly MinioOptions options;
@@ -19,13 +20,8 @@ public class MinioStorageService:IFileStorageService
             .Build();
     }
 
-    public async Task EnsureBucketExistsAsync(string bucketName, CancellationToken ct = default)
-    {
-        var exists = await client.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName), ct);
-        if (!exists) await client.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName), ct);
-    }
-
-    public async Task<string> UploadAsync(Stream content, string contentType, string bucketName, string objectName, CancellationToken ct = default)
+    public async Task<string> UploadAsync(Stream content, string contentType, string bucketName, string objectName,
+        CancellationToken ct = default)
     {
         await EnsureBucketExistsAsync(bucketName, ct);
 
@@ -39,6 +35,12 @@ public class MinioStorageService:IFileStorageService
         var endpoint = string.IsNullOrWhiteSpace(options.PublicEndpoint) ? options.Endpoint : options.PublicEndpoint;
         var scheme = options.WithSSL ? "https" : "http";
         return $"{scheme}://{endpoint}/{bucketName}/{objectName}";
+    }
+
+    public async Task EnsureBucketExistsAsync(string bucketName, CancellationToken ct = default)
+    {
+        var exists = await client.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName), ct);
+        if (!exists) await client.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName), ct);
     }
 
     /*public async Task DeleteAsync(string bucketName, string objectName, CancellationToken ct = default)
