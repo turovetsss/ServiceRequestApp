@@ -44,8 +44,7 @@ public class UsersController(IUserService userService) : ControllerBase
 
 	[HttpGet("masters")]
 	[Authorize(Roles = "Admin")]
-	public async Task<ActionResult<PagedMastersDto>> GetMasters([FromQuery] int page = 1, [FromQuery] int size = 10,
-		[FromQuery] bool? isActive = null)
+	public async Task<ActionResult<PagedMastersDto>> GetMasters([FromQuery] int page = 1, [FromQuery] int size = 10)
 	{
 		var companyIdClaim = User.FindFirst("CompanyId");
 		if (companyIdClaim == null || !int.TryParse(companyIdClaim.Value, out var companyId))
@@ -53,7 +52,7 @@ public class UsersController(IUserService userService) : ControllerBase
 			return Unauthorized("CompanyId claim not found or invalid in token");
 		}
 
-		var result = await userService.GetMastersByCompanyAsync(companyId, page, size, isActive);
+		var result = await userService.GetMastersByCompanyAsync(companyId, page, size);
 
 		return Ok(result);
 	}

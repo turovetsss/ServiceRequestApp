@@ -33,8 +33,8 @@ public class UserService(IUserRepository userRepository) : IUserService
     public async Task<PagedMastersDto> GetMastersByCompanyAsync(int companyId, int page, int size,
         bool? isActive = null)
     {
-        var masters = await userRepository.GetMastersByCompanyIdAsync(companyId, page, size, isActive);
-        var totalCount = await userRepository.GetMasterCountAsyncByCompanyId(companyId, isActive);
+        var masters = await userRepository.GetMastersByCompanyIdAsync(companyId, page, size);
+        var totalCount = await userRepository.GetMasterCountAsyncByCompanyId(companyId);
 
         return new PagedMastersDto
         {

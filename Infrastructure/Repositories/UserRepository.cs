@@ -29,7 +29,7 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository
     }
 
 
-    public async Task<List<User>> GetMastersByCompanyIdAsync(int companyId, int page, int size, bool? isActive = null)
+    public async Task<List<User>> GetMastersByCompanyIdAsync(int companyId, int page, int size)
     {
         var masters = context.Users
             .Where(u => u.CompanyId == companyId && u.Role == UserRole.Master);
@@ -52,11 +52,10 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task<int> GetMasterCountAsyncByCompanyId(int companyId, bool? isActive = null)
+    public async Task<int> GetMasterCountAsyncByCompanyId(int companyId)
     {
         var count = context.Users
             .Where(u => u.CompanyId == companyId && u.Role == UserRole.Master);
-        if (isActive != null) count = count.Where(u => u.IsActive == isActive.Value);
         return await count.CountAsync();
     }
 
