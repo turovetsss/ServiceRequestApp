@@ -7,7 +7,7 @@ using UserRole = Domain.Entities.UserRole;
 
 namespace Application.Services;
 
-public class UserService(IUserRepository userRepository):IUserService
+public class UserService(IUserRepository userRepository) : IUserService
 {
     public async Task<UserDto> CreateMasterAsync(CreateMasterDto createMasterDto, int companyId)
     {
@@ -17,8 +17,7 @@ public class UserService(IUserRepository userRepository):IUserService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(createMasterDto.Password),
             Role = UserRole.Master,
             CompanyId = companyId,
-            IsActive=true
-            
+            IsActive = true
         };
         await userRepository.CreateUserAsync(master);
         return new UserDto
@@ -31,10 +30,11 @@ public class UserService(IUserRepository userRepository):IUserService
         };
     }
 
-    public async Task<PagedMastersDto> GetMastersByCompanyAsync(int companyId, int page, int size, bool? isActive = null)
+    public async Task<PagedMastersDto> GetMastersByCompanyAsync(int companyId, int page, int size,
+        bool? isActive = null)
     {
-        var masters=await userRepository.GetMastersByCompanyIdAsync(companyId, page, size, isActive);
-        var totalCount=await userRepository.GetMasterCountAsyncByCompanyId(companyId, isActive);
+        var masters = await userRepository.GetMastersByCompanyIdAsync(companyId, page, size, isActive);
+        var totalCount = await userRepository.GetMasterCountAsyncByCompanyId(companyId, isActive);
 
         return new PagedMastersDto
         {
@@ -70,44 +70,57 @@ public class UserService(IUserRepository userRepository):IUserService
         };
     }
 
-    public async  Task<UserDto> UpdateMasterAsync(int id, UpdateMasterDto updateMasterDto, int companyId)
+    public async Task<UserDto> UpdateMasterAsync(int id, UpdateMasterDto updateMasterDto, int companyId)
     {
-       var master=await userRepository.GetMastersByIdAsync(id, companyId);
-       if (master == null)
-       {
-           throw new Exception("Мастер не найден");
-       }
-       master.Email = updateMasterDto.Email;
-       master.IsActive = updateMasterDto.isActive;
-       
-       await userRepository.UpdateUserAsync(master);
-       return new UserDto
-       {
-           Id = master.Id,
-           Email = master.Email,
-           Role = master.Role,
-           CompanyId = master.CompanyId,
-           IsActive = master.IsActive
-       };
-    }
-
-    public async Task DeactivateMasterAsync(int id, int companyId)
-    {
-        var master=userRepository.GetMastersByIdAsync(id, companyId);
+        var master = await userRepository.GetMastersByIdAsync(id, companyId);
         if (master == null)
         {
             throw new Exception("Мастер не найден");
         }
-        //master.IsActive=false;
-        //await userRepository.UpdateUserAsync(master);
-        
+
+        master.Email = updateMasterDto.Email;
+        master.IsActive = updateMasterDto.isActive;
+
+        await userRepository.UpdateUserAsync(master);
+        return new UserDto
+        {
+            Id = master.Id,
+            Email = master.Email,
+            Role = master.Role,
+            CompanyId = master.CompanyId,
+            IsActive = master.IsActive
+        };
+    }
+
+    public async Task DeactivateMasterAsync(int id, int companyId)
+    {
+        var master = await userRepository.GetMastersByIdAsync(id, companyId);
+        if (master == null)
+        {
+            throw new Exception("Master not found");
+        }
+
+        master.IsActive = false;
+        await userRepository.UpdateUserAsync(master);
     }
 
     public async Task<UserDto> ActivateMasterAsync(int id, int companyId)
     {
-        throw new NotImplementedException();
+        var master = await userRepository.GetMastersByIdAsync(id, companyId);
+        if (master == null)
+        {
+            throw new Exception("Master not found");
+        }
+
+        master.IsActive = true;
+        await userRepository.UpdateUserAsync(master);
+        return new UserDto
+        {
+            Id = master.Id,
+            Email = master.Email,
+            Role = master.Role,
+            CompanyId = master.CompanyId,
+            IsActive = master.IsActive
+        };
     }
-
-   
 }
-

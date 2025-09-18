@@ -87,4 +87,48 @@ public class UsersController(IUserService userService) : ControllerBase
 
 		return Ok(master);
 	}
+
+	[HttpPatch("masters/{id}/deactivated")]
+	[Authorize(Roles = "Admin")]
+	public async Task<ActionResult<UserDto>> DeactivateMaster(int id)
+	{
+		var companyIdClaim = User.FindFirst("CompanyId");
+		if (companyIdClaim == null || !int.TryParse(companyIdClaim.Value, out var companyId))
+		{
+			return Unauthorized("CompanyId claim not found or invalid in token");
+		}
+
+		try
+		{
+			await userService.DeactivateMasterAsync(id, companyId);
+
+			return Ok();
+		}
+		catch (Exception e)
+		{
+			return BadRequest(e);
+		}
+	}
+
+	[HttpPatch("masters/{id}/activated")]
+	[Authorize(Roles = "Admin")]
+	public async Task<ActionResult<UserDto>> ActivateMaster(int id)
+	{
+		var companyIdClaim = User.FindFirst("CompanyId");
+		if (companyIdClaim == null || !int.TryParse(companyIdClaim.Value, out var companyId))
+		{
+			return Unauthorized("CompanyId claim not found or invalid in token");
+		}
+
+		try
+		{
+			await userService.ActivateMasterAsync(id, companyId);
+
+			return Ok();
+		}
+		catch (Exception e)
+		{
+			return BadRequest(e);
+		}
+	}
 }

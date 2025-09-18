@@ -46,7 +46,7 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository
             .FirstOrDefaultAsync(u => u.Id == id && u.CompanyId == companyId && u.Role == UserRole.Master);
     }
 
-    public async Task UpdateUserAsync(User? user)
+    public async Task UpdateUserAsync(User user)
     {
         context.Users.Update(user);
         await context.SaveChangesAsync();
