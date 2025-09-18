@@ -2,12 +2,11 @@
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+
 namespace Infrastructure.Repositories;
 
 public class CompanyRepository(ApplicationDbContext context) : ICompanyRepository
 {
-
-    
     public async Task<Company?> GetCompanyByIdAsync(int id)
     {
         return await context.Companies.FindAsync(id);
@@ -17,7 +16,7 @@ public class CompanyRepository(ApplicationDbContext context) : ICompanyRepositor
     {
         return await context.Companies.ToListAsync();
     }
-    
+
     public async Task CreateCompanyAsync(Company? company)
     {
         context.Companies.Add(company);
@@ -38,6 +37,5 @@ public class CompanyRepository(ApplicationDbContext context) : ICompanyRepositor
             context.Companies.Remove(company);
             await context.SaveChangesAsync();
         }
-
     }
 }

@@ -6,5 +6,5 @@ public class EquipmentDto
     public string Name { get; set; }
     public string Description { get; set; }
     public int CompanyId { get; set; }
-    public List<EquipmentPhotoDto> Photos { get; set; }= new();
+    public List<EquipmentPhotoDto> Photos { get; set; } = new();
 }

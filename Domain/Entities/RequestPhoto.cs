@@ -7,6 +7,6 @@ public class RequestPhoto
     public string PhotoUrl { get; set; }
     public string ObjectKey { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+
     public Request Request { get; set; }
 }

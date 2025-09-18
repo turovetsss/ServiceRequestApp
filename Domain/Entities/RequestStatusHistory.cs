@@ -1,5 +1,4 @@
-﻿using Domain.Enums;
-namespace Domain.Entities;
+﻿namespace Domain.Entities;
 
 public class RequestStatusHistory
 {
@@ -9,7 +8,7 @@ public class RequestStatusHistory
     public RequestStatus NewStatus { get; set; }
     public DateTime ChangedAt { get; set; }
     public int ChangedByUserId { get; set; }
-    
+
     public Request Request { get; set; }
     public User ChangedByUser { get; set; }
 }

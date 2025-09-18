@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository(ApplicationDbContext context):IUserRepository
+public class UserRepository(ApplicationDbContext context) : IUserRepository
 {
-   
     public async Task<User?> GetByIdAsync(int id)
     {
         return await context.Users.FindAsync(id);
@@ -28,7 +27,7 @@ public class UserRepository(ApplicationDbContext context):IUserRepository
         context.Users.Add(user);
         await context.SaveChangesAsync();
     }
-    
+
 
     public async Task<List<User>> GetMastersByCompanyIdAsync(int companyId, int page, int size, bool? isActive = null)
     {
@@ -57,10 +56,7 @@ public class UserRepository(ApplicationDbContext context):IUserRepository
     {
         var count = context.Users
             .Where(u => u.CompanyId == companyId && u.Role == UserRole.Master);
-        if (isActive != null)
-        {
-            count = count.Where(u => u.IsActive == isActive.Value);
-        }
+        if (isActive != null) count = count.Where(u => u.IsActive == isActive.Value);
         return await count.CountAsync();
     }
 
@@ -72,7 +68,5 @@ public class UserRepository(ApplicationDbContext context):IUserRepository
             context.Users.Remove(user);
             await context.SaveChangesAsync();
         }
-        
     }
-    
 }

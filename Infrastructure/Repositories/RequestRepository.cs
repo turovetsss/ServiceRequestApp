@@ -54,21 +54,7 @@ public class RequestRepository(ApplicationDbContext context):IRequestRepository
         }
         
     }
-    public async  Task<List<Request>?> MasterGetAvailableRequestsAsync(int masterId, int page, int size, RequestStatus? status)
-    {
-        var query = context.Requests
-            .Where(r => r.CompanyId == masterId)
-            .Include(r => r.Company)
-            .Include(r => r.CreatedByAdminId)
-            .Include(r => r.DateFrom)
-            .Include(r => r.DateTo)
-            .Include(r => r.Photos)
-            .OrderBy(r => r.Id);
-        return await query
-            .Skip((page - 1) * size)
-            .Take(size)
-            .ToListAsync();
-    }
+
     public async Task<List<Request>> GetAssignedToMasterAsync(int masterId, RequestStatus? status, int page, int size)
     {
         var query = context.Requests
@@ -99,5 +85,4 @@ public class RequestRepository(ApplicationDbContext context):IRequestRepository
             .Take(size)
             .ToListAsync();
     }
-    
 }

@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Equipment;
-using Application.DTOs.Request;
+
 namespace Application.Interfaces;
 
 public interface IEquipmentService
@@ -7,7 +7,7 @@ public interface IEquipmentService
     Task<EquipmentDto> GetEquipmentByIdAsync(int id);
     Task<IEnumerable<EquipmentDto>> GetAllEquipmentAsync();
     Task<EquipmentDto> CreateEquipmentAsync(CreateEquipmentDto createDto, int companyId);
-    Task<EquipmentDto> UpdateEquipmentAsync(int id,UpdateEquipmentDto updateDto);
+    Task<EquipmentDto> UpdateEquipmentAsync(int id, UpdateEquipmentDto updateDto);
     Task DeleteEquipmentAsync(int id);
     Task RemoveEquipmentPhotoAsync(int photoId);
     Task AddEquipmentPhotoAsync(int equipmentId, string photoUrl, string objectKey);

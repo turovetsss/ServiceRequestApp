@@ -32,10 +32,7 @@ public class EquipmentPhotoRepository : IEquipmentPhotoRepository
     public async Task DeleteAsync(EquipmentPhotoDto photo)
     {
         var entity = await _domainRepository.GetByIdAsync(photo.Id);
-        if (entity != null)
-        {
-            await _domainRepository.DeleteAsync(entity);
-        }
+        if (entity != null) await _domainRepository.DeleteAsync(entity);
     }
 
     public async Task SaveChangesAsync()

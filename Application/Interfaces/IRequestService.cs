@@ -2,7 +2,6 @@
 using Application.DTOs.Request;
 using Domain.Entities;
 using Domain.Enums;
-using Microsoft.AspNetCore.Http;
 using RequestStatus = Domain.Entities.RequestStatus;
 
 namespace Application.Interfaces;
@@ -21,7 +20,6 @@ public interface IRequestService
    Task<List<RequestDto>> GetAssignedRequestsAsync(int masterId,RequestStatus? status,int page,int size);
    Task<Request> MasterAcceptRequestAsync(int requestId, int masterId);
    Task<Request> MasterStartWorkAsync(int requestId, int masterId);
-   Task<List<CompletedWorkPhotoDto>> UploadCompletedWorkPhotoAsync(int requestId,List<IFormFile> files,int userId,CancellationToken ct);
    Task<Request> MasterCompletedWorkAsync(int requestId, int masterId, List<string> photoUrls);
-   Task<List<Request>> MasterGetAvailableRequestsAsync(int masterId, RequestStatus? status, int page , int size );
+   Task<List<Request>> MasterGetAvailableRequestsAsync(int masterId, RequestStatus? status, int page = 1, int size = 10);
 }

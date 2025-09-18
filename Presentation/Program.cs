@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 var secret=builder.Configuration["Jwt:Secret"];
 var configuration = builder.Configuration;
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
         configuration.GetConnectionString("WebApiDatabase"),
         npgsql => npgsql.MigrationsAssembly("Infrastructure")
@@ -41,7 +41,7 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuer = false,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
             ValidateAudience = false,
-            ValidateLifetime = true,
+            ValidateLifetime = false,
             RoleClaimType = ClaimTypes.Role
         };
     });
@@ -93,12 +93,13 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
+    // Configure file upload support
     c.MapType<IFormFile>(() => new OpenApiSchema
     {
         Type = "string",
         Format = "binary"
     });
-    
+
     c.MapType<IFormFile[]>(() => new OpenApiSchema
     {
         Type = "array",

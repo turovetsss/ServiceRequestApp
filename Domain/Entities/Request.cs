@@ -1,14 +1,12 @@
-﻿using Domain.Enums;
-
-namespace Domain.Entities;
+﻿namespace Domain.Entities;
 
 public class Request
 {
     public int Id { get; set; }
     public int? CompanyId { get; set; }
-    public int? EquipmentId { get; set; } 
-    public string Description { get; set; } 
-    public string Phone { get; set; } 
+    public int? EquipmentId { get; set; }
+    public string Description { get; set; }
+    public string Phone { get; set; }
     public DateTime DateFrom { get; set; }
     public DateTime DateTo { get; set; }
     public RequestStatus Status { get; set; }
@@ -18,19 +16,18 @@ public class Request
     public ICollection<CompletedWorkPhoto> CompletedWorkPhotos { get; set; } = new List<CompletedWorkPhoto>();
     public ICollection<Document> Documents { get; set; } = new List<Document>();
     public ICollection<RequestStatusHistory> StatusHistory { get; set; } = new List<RequestStatusHistory>();
-    
+
     public User CreatedByAdmin { get; set; }
     public User AssignedMaster { get; set; }
     public Company? Company { get; set; }
     public Equipment? Equipment { get; set; }
-    
 }
 
 public enum RequestStatus
 {
-    Sent=0,
-    MasterAssigned=1,
-    InProgress=2,
-    WorkCompleted=3,
-    Closed=4
+    Sent = 0,
+    MasterAssigned = 1,
+    InProgress = 2,
+    WorkCompleted = 3,
+    Closed = 4
 }

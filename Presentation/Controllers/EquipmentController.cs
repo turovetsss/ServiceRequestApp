@@ -28,6 +28,8 @@ public class EquipmentController(IEquipmentService equipmentService):ControllerB
     public async Task<IActionResult> GetEquipmentById(int id)
     {
         var equipment = await equipmentService.GetEquipmentByIdAsync(id);
+        if (equipment == null)
+            return NotFound();
         return Ok(equipment);
     }
 
@@ -60,6 +62,6 @@ public class EquipmentController(IEquipmentService equipmentService):ControllerB
         await equipmentService.DeleteEquipmentAsync(id);
         return NoContent();
     }
-    
+
 }
 

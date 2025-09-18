@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-namespace Domain.Interfaces;
+﻿namespace Domain.Interfaces;
 
 public interface IRepository<T> where T : class
 {

@@ -1,5 +1,5 @@
-﻿using Application.DTOs.Request;
-using Domain.Entities;
+﻿using Domain.Entities;
+
 namespace Application.Interfaces;
 
 public interface ICompletedWorkPhotoRepository

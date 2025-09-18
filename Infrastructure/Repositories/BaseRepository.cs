@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using Domain.Entities;
-using Domain.Interfaces;
+﻿using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+
 namespace Infrastructure.Repositories;
+
 public class Repository<T> : IRepository<T> where T : class
 {
     private readonly ApplicationDbContext _context;

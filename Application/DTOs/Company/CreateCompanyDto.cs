@@ -2,5 +2,5 @@
 
 public class CreateCompanyDto
 {
-        public string Name { get; set; }
+    public string Name { get; set; }
 }

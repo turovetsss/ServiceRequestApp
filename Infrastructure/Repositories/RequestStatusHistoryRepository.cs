@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class RequestStatusHistoryRepository(ApplicationDbContext context):IRequestStatusHistoryRepository
+public class RequestStatusHistoryRepository(ApplicationDbContext context) : IRequestStatusHistoryRepository
 {
     public async Task<RequestStatusHistory> GetByIdAsync(int id)
     {
@@ -19,7 +19,7 @@ public class RequestStatusHistoryRepository(ApplicationDbContext context):IReque
         return await context.RequestStatusHistories
             .Include(h => h.ChangedByUser)
             .Where(h => h.RequestId == requestId)
-            .OrderByDescending(h=>h.ChangedAt)
+            .OrderByDescending(h => h.ChangedAt)
             .ToListAsync();
     }
 
@@ -37,11 +37,11 @@ public class RequestStatusHistoryRepository(ApplicationDbContext context):IReque
 
     public async Task DeleteAsync(int id)
     {
-       var status=await GetByIdAsync(id);
-       if (status != null)
-       {
-           context.RequestStatusHistories.Remove(status);
-           await context.SaveChangesAsync();
-       }
+        var status = await GetByIdAsync(id);
+        if (status != null)
+        {
+            context.RequestStatusHistories.Remove(status);
+            await context.SaveChangesAsync();
+        }
     }
 }

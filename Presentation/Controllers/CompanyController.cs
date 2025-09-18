@@ -13,7 +13,7 @@ namespace Presentation.Controllers;
 [Route("api/[controller]")]
 public class CompanyController(ICompanyService companyService):ControllerBase
 {
-  
+
     [HttpGet("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(CompanyDto), StatusCodes.Status200OK)]
@@ -21,6 +21,8 @@ public class CompanyController(ICompanyService companyService):ControllerBase
     public async Task<IActionResult> GetCompany(int id)
     {
         var company = await companyService.GetCompanyByIdAsync(id);
+        if (company == null)
+            return NotFound();
         return Ok(company);
     }
 
