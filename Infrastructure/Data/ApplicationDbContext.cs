@@ -66,6 +66,9 @@ public class ApplicationDbContext: DbContext
                 .WithMany(e => e.Requests)
                 .HasForeignKey(r => r.EquipmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(r => r.Status)
+                .HasConversion<int>()
+                .HasDefaultValue(RequestStatus.Sent);
         });
         modelBuilder.Entity<Equipment>()
             .HasOne(e => e.Company)

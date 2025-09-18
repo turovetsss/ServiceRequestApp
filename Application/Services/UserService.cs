@@ -57,7 +57,7 @@ public class UserService(IUserRepository userRepository):IUserService
         var master = await userRepository.GetMastersByIdAsync(id, companyId);
         if (master == null)
         {
-            throw new Exception("Мастер не найден");
+            throw new Exception("Master not found");
         }
 
         return new UserDto
@@ -75,7 +75,7 @@ public class UserService(IUserRepository userRepository):IUserService
        var master=await userRepository.GetMastersByIdAsync(id, companyId);
        if (master == null)
        {
-           throw new Exception("Мастер не найден");
+           throw new Exception("Master not found");
        }
        master.Email = updateMasterDto.Email;
        master.IsActive = updateMasterDto.isActive;
@@ -96,7 +96,7 @@ public class UserService(IUserRepository userRepository):IUserService
         var master=userRepository.GetMastersByIdAsync(id, companyId);
         if (master == null)
         {
-            throw new Exception("Мастер не найден");
+            throw new Exception("Master not found");
         }
         //master.IsActive=false;
         //await userRepository.UpdateUserAsync(master);

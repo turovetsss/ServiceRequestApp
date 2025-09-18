@@ -21,8 +21,6 @@ public class CompanyController(ICompanyService companyService):ControllerBase
     public async Task<IActionResult> GetCompany(int id)
     {
         var company = await companyService.GetCompanyByIdAsync(id);
-        if (company == null)
-            return NotFound();
         return Ok(company);
     }
 

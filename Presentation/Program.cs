@@ -41,7 +41,7 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuer = false,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
             ValidateAudience = false,
-            ValidateLifetime = false,
+            ValidateLifetime = true,
             RoleClaimType = ClaimTypes.Role
         };
     });
@@ -92,8 +92,7 @@ builder.Services.AddSwaggerGen(c =>
             new string[] { }
         }
     });
-    
-    // Configure file upload support
+
     c.MapType<IFormFile>(() => new OpenApiSchema
     {
         Type = "string",

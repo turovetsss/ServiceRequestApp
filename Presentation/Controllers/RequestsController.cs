@@ -37,6 +37,18 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
         var request = await requestService.CreateRequestAsync(createDto, companyId, adminId);
         return CreatedAtAction(nameof(GetRequest), new { id = request.Id }, request);
     }
+
+    [HttpGet("Master/unassigned-requests")]
+    [Authorize(Roles = "Master")]
+    [ProducesResponseType(typeof(IEnumerable<RequestDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUnassignedRequests([FromQuery] RequestStatus? status,
+      [FromQuery] int page=1, [FromQuery] int size=20)
+    {
+        var masterId=GetCurrentUserId();
+        var requests=await requestService.MasterGetAvailableRequestsAsync(masterId, status, page, size);
+        return Ok(requests);
+    }
     [HttpGet("Master/assigned-to-me")]
     [Authorize(Roles = "Master")]
     [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
@@ -46,42 +58,26 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
         [FromQuery] int page = 1, 
         [FromQuery] int size = 20)
     {
-        try
-        {
+     
             var masterId = GetCurrentUserId();
             var requests = await requestService.GetAssignedRequestsAsync(masterId, status, page, size);
             return Ok(requests);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+       
     }
+    
+    [HttpGet("Master/")]
     [HttpPatch("{id}/master/accept")]
     [Authorize(Roles = "Master")]
     [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Request>> AcceptRequest(int id)
     {
-        try
-        {
+       
             var masterId = GetCurrentUserId();
             var request = await
                 requestService.MasterAcceptRequestAsync(id, masterId);
             return Ok(request);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+       
     }
     [HttpPatch("{id}/master/start-work")]
     [Authorize(Roles = "Master")]
@@ -89,82 +85,24 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Request>> StartWork(int id)
     {
-        try
-        {
             var masterId = GetCurrentUserId();
             var request = await requestService.MasterStartWorkAsync(id, masterId);
             return Ok(request);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
     }
     
 
     [HttpPost("{id}/upload-completed-photo")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Master")]
     [ProducesResponseType(typeof(List<CompletedWorkPhotoDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<CompletedWorkPhotoDto>>> UploadCompletedPhoto(int id, [FromForm] List<IFormFile> files)
+    public async Task<ActionResult<List<CompletedWorkPhotoDto>>> UploadCompletedPhoto(int id, [FromForm] List<IFormFile> files, CancellationToken ct)
     {
         if (files == null || files.Count == 0)
             return BadRequest("No files");
 
-        var masterId = GetCurrentUserId();
-        var request = await requestService.GetRequestByIdAsync(id);
-        if (request == null)
-            return NotFound($"Request with id {id} not found");
-        
-        if (request.Status != "InProgress") 
-            return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
-
-        var result = new List<CompletedWorkPhotoDto>();
-        foreach (var file in files)
-        {
-            if (file.Length == 0)
-                continue;
-
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            using var stream = file.OpenReadStream();
-
-            var photoUrl = await fileStorageService.UploadAsync(
-                stream,
-                file.ContentType,
-                "completed-work-photos",
-                fileName);
-
-            var completedWorkPhoto = new CompletedWorkPhoto
-            {
-                RequestId = id,
-                PhotoUrl = photoUrl,
-                ObjectKey = fileName,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await completedWorkPhotoRepository.AddAsync(completedWorkPhoto);
-            result.Add(new CompletedWorkPhotoDto
-            {
-                Id = completedWorkPhoto.Id,
-                RequestId = completedWorkPhoto.RequestId,
-                PhotoUrl = completedWorkPhoto.PhotoUrl,
-                ObjectKey = completedWorkPhoto.ObjectKey,
-                CreatedAt = completedWorkPhoto.CreatedAt
-            });
-        }
-
-        await completedWorkPhotoRepository.SaveChangesAsync();
         var userId = GetCurrentUserId();
-        await requestService.UpdateStatusAsync(id, RequestStatus.WorkCompleted, userId);
-        return Ok(result);
+        var result=await requestService.UploadCompletedWorkPhotoAsync(id, files, userId,ct);
+         return Ok(result);
     }
 
 
@@ -218,9 +156,6 @@ public class RequestsController(IRequestService requestService, IFileStorageServ
     public async Task<IActionResult> GetRequest(int id)
     {
         var request = await requestService.GetRequestByIdAsync(id);
-        if (request == null)
-            return NotFound();
-
         return Ok(request);
     }
 

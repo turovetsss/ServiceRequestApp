@@ -3,6 +3,7 @@ using Application.DTOs.Request;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Http;
 using ICompletedWorkPhotoRepository = Application.Interfaces.ICompletedWorkPhotoRepository;
 using RequestStatus = Domain.Entities.RequestStatus;
 using IRequestPhotoRepository = Application.Interfaces.IRequestPhotoRepository;
@@ -16,6 +17,7 @@ public class RequestService(
     IRequestStatusHistoryRepository requestStatusHistoryRepository,
     IRequestPhotoRepository photoRepository,
     ICompanyRepository companyRepository,
+    IFileStorageService fileStorageService,
     ICompletedWorkPhotoRepository completedWorkPhotoRepository)
     : IRequestService
 {
@@ -124,7 +126,14 @@ public class RequestService(
     public async Task DeleteRequestAsync(int requestId)
     {
         var request = await requestRepository.GetRequestByIdAsync(requestId);
-        await  requestRepository.DeleteRequstAsync(requestId);
+        if (request != null)
+        {
+            await requestRepository.DeleteRequstAsync(requestId);
+        }
+        else
+        {
+            throw new ArgumentException($"Request with id {requestId} does not exist.");
+        }
     }
 
     public async Task AssignMasterAsync(int requestId, int userId)
@@ -132,107 +141,148 @@ public class RequestService(
         var request = await requestRepository.GetRequestByIdAsync(requestId);
         var master=await userRepository.GetByIdAsync(userId);
         request.AssignedMasterId = master.Id;
-        if (request.Status == RequestStatus.Sent)
+        if (request.Status == RequestStatus.Sent && request.CompanyId == master.CompanyId)
         {
             await UpdateStatusAsync(requestId, RequestStatus.MasterAssigned, request.CreatedByAdminId);
         }
         else
         {
-            await requestRepository.UpdateRequestAsync(request);
+            throw new Exception("Only request with 'Sent' status can be assigned.");
         }
+        
     }
 
     public async Task UpdateStatusAsync(int requestId, RequestStatus newStatus, int userId)
     {
         var request = await requestRepository.GetRequestByIdAsync(requestId);
-        var oldStatus = request.Status;
-        request.Status = newStatus;
-        await requestRepository.UpdateRequestAsync(request);
-        await requestStatusHistoryRepository.AddAsync(new RequestStatusHistory
+        if (request != null && newStatus != null)
         {
-            RequestId = requestId,
-            OldStatus = oldStatus,
-            NewStatus = newStatus,
-            ChangedByUserId = userId,
-            ChangedAt = DateTime.UtcNow
-        });
+            var oldStatus = request.Status;
+            request.Status = newStatus;
+            await requestRepository.UpdateRequestAsync(request);
+            await requestStatusHistoryRepository.AddAsync(new RequestStatusHistory
+            {
+                RequestId = requestId,
+                OldStatus = oldStatus,
+                NewStatus = newStatus,
+                ChangedByUserId = userId,
+                ChangedAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            throw new ArgumentException($"Request with id {requestId} does not exist.");
+        }
+       
     }
     
     public async Task<List<RequestDto>> GetAllRequestsByCompanyIdAsync(int companyId, int page, int size, RequestStatus? status)
     {
         var requests=await requestRepository.GetAllRequestByCompanyIdAsync(companyId, page, size, status);
-        return requests.Select(r=>new RequestDto
+        if (requests != null)
         {
-            Id = r.Id,
-            EquipmentId = r.EquipmentId,
-            Description = r.Description,
-            Phone = r.Phone,
-            DateFrom = r.DateFrom,
-            DateTo = r.DateTo,
-            CreatedByAdminId = r.CreatedByAdminId,
-            AssignedMasterId = r.AssignedMasterId,
-        }).ToList();
+            return requests.Select(r => new RequestDto
+            {
+                Id = r.Id,
+                EquipmentId = r.EquipmentId,
+                Description = r.Description,
+                Phone = r.Phone,
+                DateFrom = r.DateFrom,
+                DateTo = r.DateTo,
+                CreatedByAdminId = r.CreatedByAdminId,
+                AssignedMasterId = r.AssignedMasterId,
+            }).ToList();
+        }
+        else
+        {
+            throw new ArgumentException($"Requests not found for company {companyId}.");
+        }
     }
 
     public async Task<IEnumerable<RequestStatusHistoryDto>> GetStatusHistoryAsync(int requestId)
     {
        var history=await requestStatusHistoryRepository.GetByRequestIdAsync(requestId);
-       return history.Select(h => new RequestStatusHistoryDto
+       if (history != null)
        {
-           Id = h.RequestId,
-           OldStatus = h.OldStatus.ToString(),
-           NewStatus = h.NewStatus.ToString(),
-           ChangedAt = h.ChangedAt,
-           ChangedByUserId = h.ChangedByUserId,
-       });
+           return history.Select(h => new RequestStatusHistoryDto
+           {
+               Id = h.RequestId,
+               OldStatus = h.OldStatus.ToString(),
+               NewStatus = h.NewStatus.ToString(),
+               ChangedAt = h.ChangedAt,
+               ChangedByUserId = h.ChangedByUserId,
+           });
+       }
+       else
+       {
+           throw new ArgumentException($"StatusHistory with request {requestId} does not exist.");
+       }
     }
 
     public async Task RemoveRequestPhotoAsync(int photoId)
     {
         var photo = await photoRepository.GetByIdAsync(photoId);
-        if (photo == null) throw new Exception("Photo not found");
-        
-        var photoDto = new RequestPhotoDto
+        if (photo == null)
         {
-            Id = photo.Id,
-            RequestId = photo.RequestId,
-            PhotoUrl = photo.PhotoUrl,
-            ObjectKey = photo.ObjectKey
-        };
-        
-        await photoRepository.DeleteAsync(photoDto);
-        await photoRepository.SaveChangesAsync();
+            throw new Exception("Photo not found");
+        }
+        else
+        {
+            var photoDto = new RequestPhotoDto
+            {
+                Id = photo.Id,
+                RequestId = photo.RequestId,
+                PhotoUrl = photo.PhotoUrl,
+                ObjectKey = photo.ObjectKey
+            };
+
+            await photoRepository.DeleteAsync(photoDto);
+            await photoRepository.SaveChangesAsync();
+        }
     }
 
     public async Task AddRequestPhotoAsync(int requestId, string photoUrl, string objectKey)
     {
         var request = await requestRepository.GetRequestByIdAsync(requestId);
-        if (request == null) throw new Exception("Equipment not found");
-        var photo = new RequestPhotoDto
+        if (request == null)
         {
-            RequestId = requestId,
-            PhotoUrl = photoUrl,
-            ObjectKey = objectKey
-        };
-        await photoRepository.AddAsync(photo);
-        await photoRepository.SaveChangesAsync();
+            throw new Exception("Equipment not found");
+        }
+        else
+        {
+            var photo = new RequestPhotoDto
+            {
+                RequestId = requestId,
+                PhotoUrl = photoUrl,
+                ObjectKey = objectKey
+            };
+            await photoRepository.AddAsync(photo);
+            await photoRepository.SaveChangesAsync();
+        }
     }
 
     public async Task<List<RequestDto>> GetAssignedRequestsAsync(int masterId, RequestStatus? status, int page, int size)
     {
         var requests=await requestRepository.GetAssignedToMasterAsync(masterId, status, page, size);
-        return requests.Select(requests=>new RequestDto
+        if (requests != null)
         {
-            Id = requests.Id,
-            EquipmentId = requests.EquipmentId,
-            Description = requests.Description,
-            Phone = requests.Phone,
-            DateFrom = requests.DateFrom,
-            DateTo = requests.DateTo,
-            Status = requests.Status.ToString(),
-            AssignedMasterId = requests.AssignedMasterId,
-            CreatedByAdminId = requests.CreatedByAdminId,
-        }).ToList();
+            return requests.Select(requests => new RequestDto
+            {
+                Id = requests.Id,
+                EquipmentId = requests.EquipmentId,
+                Description = requests.Description,
+                Phone = requests.Phone,
+                DateFrom = requests.DateFrom,
+                DateTo = requests.DateTo,
+                Status = requests.Status.ToString(),
+                AssignedMasterId = requests.AssignedMasterId,
+                CreatedByAdminId = requests.CreatedByAdminId,
+            }).ToList();
+        }
+        else
+        {
+            throw new ArgumentException($"Requests not found for master {masterId}.");
+        }
     }
 
   
@@ -293,7 +343,45 @@ public class RequestService(
        });
        return request;
     }
-    
+
+    public async Task<List<CompletedWorkPhotoDto>> UploadCompletedWorkPhotoAsync(int requestId, List<IFormFile> files, int userId, CancellationToken ct)
+    {
+        var request=await requestRepository.GetRequestByIdAsync(requestId);
+        if (request == null) throw new Exception("Request not found");
+        if(request.Status != RequestStatus.InProgress) throw new Exception($"Only request with 'InProgress' status can be uploaded");
+        var result = new List<CompletedWorkPhotoDto>();
+        foreach (var file in files)
+        {
+            if(file.Length==0) continue;
+            var extension = Path.GetExtension(file.FileName);
+            var key = $"{requestId}/{DateTime.UtcNow:yyyy/MM}/{Guid.NewGuid()}{extension}";
+
+            await using var stream = file.OpenReadStream();
+            var url = await fileStorageService.UploadAsync(stream, file.ContentType, "completed-work-photos", key, ct);
+
+            var photo = new CompletedWorkPhoto
+            {
+                RequestId = requestId,
+                PhotoUrl = url,
+                ObjectKey = key,
+                CreatedAt = DateTime.UtcNow
+            };
+            await completedWorkPhotoRepository.AddAsync(photo);
+            result.Add(new CompletedWorkPhotoDto
+            {
+                Id = photo.Id,
+                RequestId = photo.RequestId,
+                PhotoUrl = photo.PhotoUrl,
+                ObjectKey = photo.ObjectKey,
+                CreatedAt = photo.CreatedAt
+            });
+        }
+
+        await completedWorkPhotoRepository.SaveChangesAsync();
+        await UpdateStatusAsync(requestId, RequestStatus.WorkCompleted,userId);
+        return result;
+    }
+
     public async Task<Request> MasterCompletedWorkAsync(int requestId, int masterId, List<string> photoUrls)
     {
         var request=await requestRepository.GetRequestByIdAsync(requestId);
@@ -342,8 +430,7 @@ public class RequestService(
     }
 
 
-    public async Task<List<Request>> MasterGetAvailableRequestsAsync(int masterId, RequestStatus? status, int page = 1,
-        int size = 10)
+    public async Task<List<Request>> MasterGetAvailableRequestsAsync(int masterId, RequestStatus? status, int page, int size)
     {
         var master=await userRepository.GetByIdAsync(masterId);
         if(master == null) throw new Exception("Master not found");
@@ -358,6 +445,7 @@ public class RequestService(
  
     public async Task<IEnumerable<RequestDto>> GetAllAsync()
     {
+        
         var requests = await requestRepository.GetAllAsync();
         return requests.Where(r => r != null).Select(r =>
         {

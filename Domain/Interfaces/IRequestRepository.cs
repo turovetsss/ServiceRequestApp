@@ -11,6 +11,7 @@ public interface IRequestRepository
     Task CreateRequestAsync(Request? request);
     Task UpdateRequestAsync(Request? request);
     Task DeleteRequstAsync(int id);
-    Task<List<Request>> GetAssignedToMasterAsync(int masterId, RequestStatus? status, int page, int size);
+    Task<List<Request>> GetAssignedToMasterAsync(int companyId, RequestStatus? status, int page, int size);
     Task<List<Request>?> GetAllRequestByCompanyIdAsync(int companyId,int page,int size,RequestStatus? status);
+    Task<List<Request>?> MasterGetAvailableRequestsAsync(int companyId, int page, int size,RequestStatus? status);
 }
