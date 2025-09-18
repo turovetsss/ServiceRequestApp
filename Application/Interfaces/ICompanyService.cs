@@ -6,5 +6,4 @@ public interface ICompanyService
 {
     Task<CompanyDto> GetCompanyByIdAsync(int companyId);
     Task<CompanyDto> UpdateCompanyAsync(int companyId, UpdateCompanyDto updateCompanyDto);
-    Task<IEnumerable<CompanyDto>> GetAllAsync();
 }

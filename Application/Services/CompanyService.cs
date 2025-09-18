@@ -28,13 +28,4 @@ public class CompanyService(ICompanyRepository companyRepository) : ICompanyServ
         await companyRepository.UpdateCompanyAsync(company);
         return await GetCompanyByIdAsync(companyId);
     }
-
-
-    public async Task<IEnumerable<CompanyDto>> GetAllAsync()
-    {
-        var companies = await companyRepository.GetAllAsync();
-
-        return companies.Where(c => c != null).Select(c => new CompanyDto
-            { Id = c.Id, Name = c.Name }).ToList();
-    }
 }
