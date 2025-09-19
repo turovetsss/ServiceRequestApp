@@ -18,11 +18,8 @@ namespace Presentation.Controllers;
 [Route("api/[controller]")]
 public class RequestsController(
 	IRequestService requestService,
-	IFileStorageService fileStorageService,
 	Application.Interfaces.ICompletedWorkPhotoRepository completedWorkPhotoRepository) : ControllerBase
 {
-	private const string CompletedWorkBucket = "completed-work-photos";
-
 	private int GetCurrentUserId()
 	{
 		return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -121,58 +118,19 @@ public class RequestsController(
 
 
 	[HttpPost("{id}/upload-completed-photo")]
-	[Authorize(Roles = "Admin")]
+	[Authorize(Roles = "Master")]
 	[ProducesResponseType(typeof(List<CompletedWorkPhotoDto>), StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	public async Task<ActionResult<List<CompletedWorkPhotoDto>>> UploadCompletedPhoto(int id,
-		[FromForm] List<IFormFile> files)
+		[FromForm] List<IFormFile> files, CancellationToken ct)
 	{
 		if (files == null || files.Count == 0)
-			return BadRequest("No files");
-
-		var masterId = GetCurrentUserId();
-		var request = await requestService.GetRequestByIdAsync(id);
-
-		if (request == null)
-			return NotFound($"Request with id {id} not found");
-
-		if (request.Status != "InProgress")
-			return BadRequest("Only requests with 'InProgress' status can have completed work photos uploaded");
-
-		var result = new List<CompletedWorkPhotoDto>();
-		foreach (var file in files)
 		{
-			if (file.Length == 0)
-				continue;
-
-			var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-			using var stream = file.OpenReadStream();
-
-			var photoUrl = await fileStorageService.UploadAsync(
-				stream,
-				file.ContentType,
-				"completed-work-photos",
-				fileName);
-
-			var completedWorkPhoto = new CompletedWorkPhoto
-			{
-				RequestId = id, PhotoUrl = photoUrl, ObjectKey = fileName, CreatedAt = DateTime.UtcNow
-			};
-
-			await completedWorkPhotoRepository.AddAsync(completedWorkPhoto);
-			result.Add(new CompletedWorkPhotoDto
-			{
-				Id = completedWorkPhoto.Id,
-				RequestId = completedWorkPhoto.RequestId,
-				PhotoUrl = completedWorkPhoto.PhotoUrl,
-				ObjectKey = completedWorkPhoto.ObjectKey,
-				CreatedAt = completedWorkPhoto.CreatedAt
-			});
+			return BadRequest("No files");
 		}
 
-		await completedWorkPhotoRepository.SaveChangesAsync();
 		var userId = GetCurrentUserId();
-		await requestService.UpdateStatusAsync(id, RequestStatus.WorkCompleted, userId);
+		var result = await requestService.UploadCompletedWorkPhotosAsync(id, files, userId, ct);
 
 		return Ok(result);
 	}

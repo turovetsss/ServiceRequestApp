@@ -3,6 +3,7 @@ using Application.DTOs.Request;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Http;
 using ICompletedWorkPhotoRepository = Application.Interfaces.ICompletedWorkPhotoRepository;
 using RequestStatus = Domain.Entities.RequestStatus;
 using IRequestPhotoRepository = Application.Interfaces.IRequestPhotoRepository;
@@ -16,6 +17,7 @@ public class RequestService(
     IRequestStatusHistoryRepository requestStatusHistoryRepository,
     IRequestPhotoRepository photoRepository,
     ICompanyRepository companyRepository,
+    IFileStorageService fileStorageService,
     ICompletedWorkPhotoRepository completedWorkPhotoRepository)
     : IRequestService
 {
@@ -296,6 +298,48 @@ public class RequestService(
             ChangedAt = DateTime.UtcNow
         });
         return request;
+    }
+
+    public async Task<List<CompletedWorkPhotoDto>> UploadCompletedWorkPhotosAsync(int requestId, List<IFormFile> files,
+        int userId, CancellationToken ct)
+    {
+        var request = await requestRepository.GetRequestByIdAsync(requestId);
+        if (request == null) throw new Exception($"Request not found: {requestId}");
+        if (request.Status != RequestStatus.InProgress)
+            throw new Exception("Only requests with 'InProgress' status can have completed work photos uploaded");
+
+        var result = new List<CompletedWorkPhotoDto>();
+        foreach (var file in files)
+        {
+            if (file.Length == 0) continue;
+
+            var ext = Path.GetExtension(file.FileName);
+            var key = $"{requestId}/{DateTime.UtcNow:yyyy/MM}/{Guid.NewGuid()}{ext}";
+
+            await using var stream = file.OpenReadStream();
+            var url = await fileStorageService.UploadAsync(stream, file.ContentType, "completed-work-photos", key, ct);
+
+            var photo = new CompletedWorkPhoto
+            {
+                RequestId = requestId,
+                PhotoUrl = url,
+                ObjectKey = key,
+                CreatedAt = DateTime.UtcNow
+            };
+            await completedWorkPhotoRepository.AddAsync(photo);
+            result.Add(new CompletedWorkPhotoDto
+            {
+                Id = photo.Id,
+                RequestId = photo.RequestId,
+                PhotoUrl = photo.PhotoUrl,
+                ObjectKey = photo.ObjectKey,
+                CreatedAt = photo.CreatedAt
+            });
+        }
+
+        await completedWorkPhotoRepository.SaveChangesAsync();
+        await UpdateStatusAsync(requestId, RequestStatus.WorkCompleted, userId);
+        return result;
     }
 
     public async Task<Request> MasterCompletedWorkAsync(int requestId, int masterId, List<string> photoUrls)
